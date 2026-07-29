@@ -21,6 +21,15 @@
 - [ ] Apply supported remote settings to owned active repositories.
 - [x] Preserve local worktrees, active phase branches, forks, archives, and excluded repositories. Include example repositories only when they are explicitly placed in rollout scope.
 - [x] Open signed draft caller-workflow migration pull requests for all 29 eligible repositories. Preserve repository-specific verification and replace only copied generic workflows.
+- [ ] Reconcile migration pull request review findings before merge.
+  - Pin every reusable workflow call and its shared validation scripts to one reviewed central commit.
+  - Grant write permissions only to trusted default-branch and manual runs.
+  - Grant pull request validation the minimum read and security permissions required by enabled jobs.
+  - Detect nested Node.js projects and run their locked checks from the correct working directory.
+  - Omit disabled or default-only inputs so caller intent remains clear.
+  - Preserve repository-specific smoke, schema, deployment, and release checks when they exceed the shared baseline.
+- [ ] Merge only migration pull requests with completed successful checks, no requested changes, no unresolved actionable feedback, and a mergeable head.
+- [ ] Leave repositories with existing build, test, dependency, wrapper, or lint failures open for repository-specific repair.
 - [ ] Verify zero remote drift after rollout.
 
 ## Phase 4. Continuous Reconciliation

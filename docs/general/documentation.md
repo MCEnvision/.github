@@ -10,6 +10,8 @@ This repository is the shared implementation layer for GitHub validation across 
 
 The quality workflow is callable through `workflow_call`. Its jobs are intentionally independent so GitHub reports precise check names and unrelated ecosystems can skip cleanly.
 
+Callers pin the reusable workflow to a reviewed central commit and pass that same commit through `shared-ref`. Every shared script checkout therefore matches the workflow definition that selected it.
+
 The Gradle job:
 
 1. Checks out the caller repository.
@@ -50,16 +52,19 @@ A caller workflow grants only the permissions needed by enabled jobs. The centra
 
 The standard caller supplies:
 
+- The immutable shared workflow and script commit.
 - Java version.
 - Gradle verification tasks.
 - Optional GameTest tasks.
-- Whether Gradle and Node.js jobs apply.
+- Whether Gradle and Node.js jobs apply, plus the Node.js working directory when the locked project is nested.
 - Supported CodeQL languages.
 - Whether native security features are available.
 - Documentation layout enforcement.
 - Optional dependency package and license restrictions.
 
 Caller workflows must not pass publication credentials to the quality workflow. Release credentials belong in separate `curseforge`, `modrinth`, or `production` environments and are available only to jobs that explicitly reference those environments.
+
+Pull request callers grant read access plus `security-events: write` only when CodeQL is enabled. Trusted default-branch, scheduled, and manual callers may grant `contents: write` for Gradle dependency submission. Disabled jobs do not receive unused write scopes.
 
 ## Branch and Merge Controls
 
@@ -93,6 +98,8 @@ Actionable feedback is verified before implementation. Valid findings update the
 Existing active repositories migrate through signed draft pull requests on `envy/central-workflow-migration`. The migration runs from temporary clones, so active local worktrees and phase branches remain untouched.
 
 Each migration replaces copied generic build and CodeQL workflows with thin callers. Repository-specific smoke tests, schema validation, publication, deployment, and other custom workflows remain in place. A repository with the standard documentation tree enables documentation enforcement immediately. A legacy repository keeps that check disabled until its documentation is migrated without mixing unrelated file movement into the workflow pull request.
+
+Caller generation detects a root or nested locked Node.js project. It enables Node.js validation only when both `package.json` and a supported lockfile exist, and passes the containing directory to the shared workflow.
 
 The current rollout covers 29 eligible repositories. The central workflow repository, CodexGateway, the EnVisione profile repository, and the GitHub Pages repository remain outside this migration.
 

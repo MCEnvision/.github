@@ -6,7 +6,7 @@ This repository provides shared GitHub Actions workflows and default community h
 
 ### Quality
 
-`EnVisione/.github/.github/workflows/quality.yml@main`
+`EnVisione/.github/.github/workflows/quality.yml@<reviewed commit sha>`
 
 The quality workflow supports:
 
@@ -14,6 +14,7 @@ The quality workflow supports:
 - Checked-in Gradle Wrapper validation and builds.
 - Repository-selected GameTest tasks.
 - Node.js validation when applicable.
+- Nested Node.js project validation through an explicit working directory.
 - Gradle dependency submission with transitive dependencies.
 - Pull request dependency review for supported repositories.
 - CodeQL for supported languages and repository plans.
@@ -22,7 +23,7 @@ The quality workflow supports:
 
 ### Release Validation
 
-`EnVisione/.github/.github/workflows/release-validation.yml@main`
+`EnVisione/.github/.github/workflows/release-validation.yml@<reviewed commit sha>`
 
 The release workflow builds and inspects artifacts, creates SHA-256 and SHA-512 checksum files, generates an SPDX JSON SBOM, records the source commit, and creates build and SBOM attestations when GitHub supports them.
 
@@ -30,7 +31,7 @@ The release workflow builds and inspects artifacts, creates SHA-256 and SHA-512 
 
 This public repository contains no credentials. Caller repositories retain credentials in branch-restricted GitHub environments. Reusable workflows receive only the permissions granted by the caller and do not inherit environment secrets.
 
-External actions are pinned to full commit SHAs. Dependabot monitors those references.
+External actions and caller references are pinned to full commit SHAs. The caller passes the same reviewed central commit to `shared-ref`, so validation scripts match the reusable workflow definition. Dependabot monitors external action references.
 
 ## Documentation
 

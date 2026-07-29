@@ -3,6 +3,11 @@ name: shared quality
 on:
   workflow_call:
     inputs:
+      shared-ref:
+        description: Immutable EnVisione/.github commit used for validation scripts.
+        required: false
+        type: string
+        default: "main"
       java-version:
         description: Java toolchain used for Gradle and Java CodeQL builds.
         required: false
@@ -33,6 +38,11 @@ on:
         required: false
         type: string
         default: "22"
+      node-working-directory:
+        description: Directory containing package.json and the supported lockfile.
+        required: false
+        type: string
+        default: "."
       codeql-languages:
         description: JSON array of CodeQL languages.
         required: false
@@ -70,7 +80,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: EnVisione/.github
-          ref: main
+          ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Validate documentation
         env:
@@ -113,7 +123,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: EnVisione/.github
-          ref: main
+          ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Set up Java
         uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
@@ -164,7 +174,8 @@ jobs:
       - name: Enable locked package managers
         run: corepack enable
       - name: Run Node.js checks
-        run: python .github-central/scripts/run_node_checks.py
+        working-directory: ${{ inputs.node-working-directory }}
+        run: python "${{ github.workspace }}/.github-central/scripts/run_node_checks.py"
 
   dependency-submission:
     name: dependency submission
@@ -239,7 +250,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: EnVisione/.github
-          ref: main
+          ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Set up Java
         if: ${{ matrix.language == 'java-kotlin' }}
