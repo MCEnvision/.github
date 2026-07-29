@@ -30,4 +30,3 @@ jobs:
     with:
       enforce-docs-layout: true
       native-security: true
-      codeql-languages: "[]"

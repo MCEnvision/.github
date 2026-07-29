@@ -23,6 +23,7 @@
 - [x] Open signed draft caller-workflow migration pull requests for all 29 eligible repositories. Preserve repository-specific verification and replace only copied generic workflows.
 - [ ] Reconcile migration pull request review findings before merge.
   - Pin every reusable workflow call and its shared validation scripts to one reviewed central commit.
+  - Isolate dependency submission and CodeQL into dedicated reusable workflows so skipped privileged jobs cannot elevate a read-only caller during workflow validation.
   - Grant write permissions only to trusted default-branch and manual runs.
   - Grant pull request validation the minimum read and security permissions required by enabled jobs.
   - Detect nested Node.js projects and run their locked checks from the correct working directory.

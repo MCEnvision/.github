@@ -15,11 +15,15 @@ The quality workflow supports:
 - Repository-selected GameTest tasks.
 - Node.js validation when applicable.
 - Nested Node.js project validation through an explicit working directory.
-- Gradle dependency submission with transitive dependencies.
 - Pull request dependency review for supported repositories.
-- CodeQL for supported languages and repository plans.
 - Documentation structure and internal-link validation.
 - Secret scanning on pull requests, pushes, schedules, and manual runs.
+
+### Privileged Security and Dependency Workflows
+
+`EnVisione/.github/.github/workflows/codeql.yml@<reviewed commit sha>` runs CodeQL with `security-events: write` only for repositories and languages that support it.
+
+`EnVisione/.github/.github/workflows/dependency-submission.yml@<reviewed commit sha>` submits the complete Gradle dependency graph with `contents: write` only after trusted default-branch pushes or manual runs.
 
 ### Release Validation
 
