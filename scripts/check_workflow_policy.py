@@ -21,6 +21,7 @@ AUDITED_REPOSITORIES = {
     "ossf/scorecard-action",
     "trufflesecurity/trufflehog",
 }
+SHARED_CODEQL_QUERY_ROOT = ".github-central/codeql/"
 
 
 def workflow_files(root: Path) -> list[Path]:
@@ -66,6 +67,13 @@ def validate(root: Path) -> list[str]:
         for number, line in enumerate(
             path.read_text(encoding="utf-8", errors="replace").splitlines(), start=1
         ):
+            if (
+                SHARED_CODEQL_QUERY_ROOT in line
+                and f"./{SHARED_CODEQL_QUERY_ROOT}" not in line
+            ):
+                errors.append(
+                    f"{relative}:{number}: shared CodeQL query paths must begin with ./"
+                )
             match = USES_PATTERN.match(line)
             if not match:
                 continue
