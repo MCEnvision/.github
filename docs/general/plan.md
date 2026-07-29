@@ -137,7 +137,7 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 
 #### Current Evidence
 
-The first organization caller rollout exposed three shared CodeQL configuration defects. NeoForge callers originally passed `.github-central/codeql/neoforge/neoforge-security.qls` as a query specifier. Without a leading `./`, CodeQL interpreted the value as an external repository specifier and stopped during database initialization before analysis began. After correcting that path, Java callers with otherwise successful Gradle builds showed a second failure. Gradle restored compilation output from cache, so the manually traced CodeQL build observed no compiler execution and failed database finalization with `CodeQL could not process any code written in Java/Kotlin`. Forced compilation corrected extraction and exposed a third defect during query compilation. Four custom NeoForge queries use the unresolved `MethodAccess` type instead of the current Java CodeQL `MethodCall` type. These failures are independent of caller source behavior.
+The first organization caller rollout exposed four shared CodeQL configuration defects. NeoForge callers originally passed `.github-central/codeql/neoforge/neoforge-security.qls` as a query specifier. Without a leading `./`, CodeQL interpreted the value as an external repository specifier and stopped during database initialization before analysis began. After correcting that path, Java callers with otherwise successful Gradle builds showed a second failure. Gradle restored compilation output from cache, so the manually traced CodeQL build observed no compiler execution and failed database finalization with `CodeQL could not process any code written in Java/Kotlin`. Forced compilation corrected extraction and exposed a third defect during query compilation. Four custom NeoForge queries used the unresolved `MethodAccess` type instead of the current Java CodeQL `MethodCall` type. After type-correct queries compiled and executed, SARIF interpretation exposed a fourth defect. The path query did not import `PathFlow::PathGraph`, so its result metadata had no required edge relation. These failures are independent of caller source behavior.
 
 #### Objective and Scope
 
@@ -148,6 +148,8 @@ The first organization caller rollout exposed three shared CodeQL configuration 
 - [ ] Replace unresolved Java CodeQL method access types with the supported `MethodCall` API while preserving each query's matching behavior.
 - [ ] Add a central query pack compilation job that installs the pinned CodeQL CLI, resolves the custom pack dependencies, and runs `query compile --check-only` on every custom query before caller rollout.
 - [ ] Extend central validation tests so the obsolete `MethodAccess` type and removal of query compilation coverage fail verification.
+- [ ] Import the generated path graph in every `path-problem` query so CodeQL produces the edge relation required for SARIF path interpretation.
+- [ ] Extend central validation tests so a path query without its flow module's `PathGraph` import fails before rollout.
 - [ ] Verify the repair with the central Python test suite, workflow policy validator, documentation validator, release validator, and GitHub Actions.
 - [ ] Merge the repair through a reviewed pull request, then repin each still open caller migration pull request to the repaired merge commit.
 - [ ] Reevaluate every caller after repinning. Merge only callers with successful deterministic checks, no requested changes, no unresolved actionable feedback, and a mergeable head.
@@ -164,6 +166,7 @@ The first organization caller rollout exposed three shared CodeQL configuration 
 
 - NeoForge CodeQL jobs resolve the shared query suite as a local path and complete initialization.
 - Every custom NeoForge query compiles against the CodeQL Java library version installed by the pinned action.
+- Every `path-problem` query provides a path graph and can be interpreted as SARIF after execution.
 - Central validation rejects the broken path form.
 - Every caller is pinned to one reviewed central merge commit.
 - Only fully passing caller pull requests merge.

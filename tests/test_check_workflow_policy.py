@@ -136,6 +136,41 @@ class WorkflowPolicyValidationTest(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn("install the pinned CodeQL CLI", errors[0])
 
+    def test_path_problem_requires_path_graph_import(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            query_root = root / "codeql" / "neoforge"
+            query_root.mkdir(parents=True)
+            query = query_root / "Example.ql"
+            query.write_text(
+                "/**\n * @kind path-problem\n */\n"
+                "import java\n"
+                "module Flow = DataFlow::Global<Config>;\n"
+                "from MethodCall call select call\n",
+                encoding="utf-8",
+            )
+            workflows = root / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            (workflows / "repository-quality.yml").write_text(
+                "steps:\n"
+                f"  - uses: github/codeql-action/setup-codeql@{SHA}\n"
+                "  - run: codeql query compile --check-only -- codeql/neoforge\n",
+                encoding="utf-8",
+            )
+            errors = validate(root)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("must import their PathGraph", errors[0])
+
+            query.write_text(
+                "/**\n * @kind path-problem\n */\n"
+                "import java\n"
+                "module Flow = DataFlow::Global<Config>;\n"
+                "import Flow::PathGraph\n"
+                "from MethodCall call select call\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(validate(root), [])
+
 
 if __name__ == "__main__":
     unittest.main()
