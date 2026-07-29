@@ -1,0 +1,263 @@
+name: shared quality
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        description: Java toolchain used for Gradle and Java CodeQL builds.
+        required: false
+        type: string
+        default: "21"
+      gradle-enabled:
+        description: Run Gradle verification and dependency submission.
+        required: false
+        type: boolean
+        default: false
+      gradle-tasks:
+        description: Space-separated Gradle verification tasks.
+        required: false
+        type: string
+        default: "check build"
+      gametest-tasks:
+        description: Space-separated GameTest tasks. Leave empty when unavailable.
+        required: false
+        type: string
+        default: ""
+      node-enabled:
+        description: Run locked Node.js checks.
+        required: false
+        type: boolean
+        default: false
+      node-version:
+        description: Node.js version used by Node repositories.
+        required: false
+        type: string
+        default: "22"
+      codeql-languages:
+        description: JSON array of CodeQL languages.
+        required: false
+        type: string
+        default: "[]"
+      native-security:
+        description: Enable CodeQL and dependency review only when GitHub supports them.
+        required: false
+        type: boolean
+        default: false
+      enforce-docs-layout:
+        description: Require README.md and the standard docs tree.
+        required: false
+        type: boolean
+        default: true
+      denied-packages:
+        description: Comma-separated dependency patterns prohibited in pull requests.
+        required: false
+        type: string
+        default: ""
+
+jobs:
+  documentation:
+    name: documentation
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out caller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - name: Check out shared validation
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: EnVisione/.github
+          ref: main
+          path: .github-central
+      - name: Validate documentation
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || '' }}
+          ENFORCE_LAYOUT: ${{ inputs.enforce-docs-layout }}
+        run: |
+          args=(--root . --base-sha "$BASE_SHA")
+          if [[ "$ENFORCE_LAYOUT" == "true" ]]; then
+            args+=(--enforce-layout)
+          fi
+          python .github-central/scripts/check_documentation.py "${args[@]}"
+
+  secret-scan:
+    name: secret scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out complete history
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - name: Scan credentials
+        uses: trufflesecurity/trufflehog@6f3c981e7b77f235fd2702dd74af25fc4b72bf11 # v3.96.0
+        with:
+          path: ./
+          version: v3.96.0
+          extra_args: --results=verified,unknown
+
+  gradle:
+    name: gradle
+    if: ${{ inputs.gradle-enabled }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out caller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Check out shared validation
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: EnVisione/.github
+          ref: main
+          path: .github-central
+      - name: Set up Java
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+      - name: Set up and validate Gradle
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
+      - name: Run Gradle verification
+        env:
+          GRADLE_TASKS: ${{ inputs.gradle-tasks }}
+        run: python .github-central/scripts/run_gradle.py --tasks "$GRADLE_TASKS"
+      - name: Run GameTests
+        if: ${{ inputs.gametest-tasks != '' }}
+        env:
+          GAMETEST_TASKS: ${{ inputs.gametest-tasks }}
+        run: python .github-central/scripts/run_gradle.py --tasks "$GAMETEST_TASKS"
+      - name: Retain test reports
+        if: ${{ always() }}
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: gradle-test-reports
+          path: |
+            **/build/reports/**
+            **/build/test-results/**
+          if-no-files-found: ignore
+          retention-days: 14
+
+  node:
+    name: node
+    if: ${{ inputs.node-enabled }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out caller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Check out shared validation
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: EnVisione/.github
+          ref: main
+          path: .github-central
+      - name: Set up Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: ${{ inputs.node-version }}
+      - name: Enable locked package managers
+        run: corepack enable
+      - name: Run Node.js checks
+        run: python .github-central/scripts/run_node_checks.py
+
+  dependency-submission:
+    name: dependency submission
+    if: >-
+      ${{
+        inputs.gradle-enabled &&
+        github.actor != 'dependabot[bot]' &&
+        (
+          github.event_name == 'workflow_dispatch' ||
+          (
+            github.event_name == 'push' &&
+            github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
+          )
+        )
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Check out caller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Set up Java
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+      - name: Submit Gradle dependency graph
+        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
+
+  dependency-review:
+    name: dependency review
+    if: >-
+      ${{
+        inputs.native-security &&
+        github.event_name == 'pull_request' &&
+        github.actor != 'dependabot[bot]'
+      }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@2031cfc080254a8a887f58cffee85186f0e49e48 # v4
+        with:
+          fail-on-severity: moderate
+          deny-packages: ${{ inputs.denied-packages }}
+          retry-on-snapshot-warnings: true
+          retry-on-snapshot-warnings-timeout: 180
+
+  codeql:
+    name: codeql, ${{ matrix.language }}
+    if: >-
+      ${{
+        inputs.native-security &&
+        inputs.codeql-languages != '[]' &&
+        github.actor != 'dependabot[bot]'
+      }}
+    strategy:
+      fail-fast: false
+      matrix:
+        language: ${{ fromJSON(inputs.codeql-languages) }}
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    steps:
+      - name: Check out caller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - name: Check out shared validation
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: EnVisione/.github
+          ref: main
+          path: .github-central
+      - name: Set up Java
+        if: ${{ matrix.language == 'java-kotlin' }}
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+      - name: Set up Gradle
+        if: ${{ matrix.language == 'java-kotlin' && inputs.gradle-enabled }}
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
+        with:
+          languages: ${{ matrix.language }}
+          build-mode: ${{ matrix.language == 'java-kotlin' && 'manual' || 'none' }}
+      - name: Build Java for CodeQL
+        if: ${{ matrix.language == 'java-kotlin' && inputs.gradle-enabled }}
+        env:
+          GRADLE_TASKS: ${{ inputs.gradle-tasks }}
+        run: python .github-central/scripts/run_gradle.py --tasks "$GRADLE_TASKS"
+      - name: Analyze
+        uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4

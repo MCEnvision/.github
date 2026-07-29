@@ -1,0 +1,26 @@
+name: workflow bug
+description: report a reproducible shared workflow defect
+title: "[bug] "
+labels: ["bug", "needs triage"]
+body:
+  - type: input
+    id: caller
+    attributes:
+      label: caller repository
+      description: provide the repository and workflow run without including private data
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: reproduction
+      description: include the event, inputs, expected behavior, actual behavior, and sanitized decisive logs
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: safety
+      options:
+        - label: i removed credentials and private data
+          required: true

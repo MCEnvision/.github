@@ -1,0 +1,32 @@
+name: quality
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+  schedule:
+    - cron: "17 4 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  security-events: write
+
+jobs:
+  validation-scripts:
+    name: validation scripts
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+      - run: python -m compileall -q scripts tests
+      - run: python -m unittest discover -s tests -v
+
+  quality:
+    uses: ./.github/workflows/quality.yml
+    with:
+      enforce-docs-layout: true
+      native-security: true
+      codeql-languages: "[]"

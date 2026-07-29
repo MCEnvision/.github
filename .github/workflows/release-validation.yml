@@ -1,0 +1,104 @@
+name: shared release validation
+
+on:
+  workflow_call:
+    inputs:
+      java-version:
+        required: false
+        type: string
+        default: "21"
+      gradle-enabled:
+        required: false
+        type: boolean
+        default: true
+      gradle-tasks:
+        required: false
+        type: string
+        default: "clean build"
+      artifact-glob:
+        required: false
+        type: string
+        default: "build/libs/*.jar"
+      sbom-path:
+        required: false
+        type: string
+        default: "build/libs"
+      environment:
+        required: false
+        type: string
+        default: "production"
+      attest:
+        required: false
+        type: boolean
+        default: true
+
+jobs:
+  validate-release:
+    name: release validation
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.environment }}
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    steps:
+      - name: Check out caller
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          fetch-depth: 0
+      - name: Check out shared validation
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
+        with:
+          repository: EnVisione/.github
+          ref: main
+          path: .github-central
+      - name: Set up Java
+        if: ${{ inputs.gradle-enabled }}
+        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+      - name: Set up and validate Gradle
+        if: ${{ inputs.gradle-enabled }}
+        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
+      - name: Build release artifacts
+        if: ${{ inputs.gradle-enabled }}
+        env:
+          GRADLE_TASKS: ${{ inputs.gradle-tasks }}
+        run: python .github-central/scripts/run_gradle.py --tasks "$GRADLE_TASKS"
+      - name: Validate artifacts and create checksums
+        env:
+          ARTIFACT_GLOB: ${{ inputs.artifact-glob }}
+        run: >-
+          python .github-central/scripts/check_release.py
+          --artifact-glob "$ARTIFACT_GLOB"
+          --output-directory release-validation
+      - name: Generate SPDX SBOM
+        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        with:
+          path: ${{ inputs.sbom-path }}
+          format: spdx-json
+          output-file: release-validation/release.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+          dependency-snapshot: false
+      - name: Attest release artifacts
+        if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        with:
+          subject-path: ${{ inputs.artifact-glob }}
+      - name: Attest release SBOM
+        if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
+        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        with:
+          subject-path: ${{ inputs.artifact-glob }}
+          sbom-path: release-validation/release.spdx.json
+      - name: Retain validated release bundle
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: validated-release-${{ github.sha }}
+          path: |
+            ${{ inputs.artifact-glob }}
+            release-validation/**
+          if-no-files-found: error
+          retention-days: 30
