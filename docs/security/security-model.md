@@ -31,6 +31,8 @@ Never add test credentials that resemble working secrets. Use clearly invalid pl
 
 Organization custom secret patterns require GitHub Secret Protection. That separately licensed feature remains disabled under the zero additional spend rule. The central TruffleHog scan provides credential coverage without enabling a paid private repository feature.
 
+The organization billing audit found approximately $1.23 of Secret Protection usage that had already accrued on private repositories. Secret Protection, private push protection, and private advanced security are disabled on every private repository. Public native scanning remains enabled where GitHub provides it without an added charge. Hard zero dollar budgets block further metered Actions, Codespaces, Packages, and Git LFS usage.
+
 ## Runner Isolation
 
 No public repository or fork pull request may execute on node1. A future node1 runner must be ephemeral, private repository only, assigned one job, isolated from long lived credentials, and wiped after completion.

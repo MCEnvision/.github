@@ -114,6 +114,8 @@ Public standard Actions and public CodeQL do not consume paid minutes. Private r
 
 Custom secret patterns require GitHub Secret Protection for organization repositories. They are documented but not enabled because the zero additional spend constraint takes priority.
 
+The final organization audit measured 1,096 Linux Actions minutes. GitHub applied the included usage discount, leaving a net Actions charge of zero dollars. The same audit found approximately $1.23 of Secret Protection usage that had already accrued on private repositories. Secret Protection, private push protection, and private advanced security were disabled on every private repository. Hard zero dollar budgets with further usage blocked remain active for Actions, Codespaces, Packages, and Git LFS. The historical Secret Protection amount remains visible in billing until GitHub removes it or applies a credit.
+
 ## GitHub Copilot Configuration
 
 Organization custom agents under `agents/` cover NeoForge implementation, issue investigation, security review, releases, documentation, GameTests, and pull request auditing. Repository skills under `.github/skills/` provide focused procedures for the same work.
@@ -132,9 +134,9 @@ The historical caller rollout covered 29 repositories before the organization tr
 
 ### Rollout Result
 
-Seventeen migration pull requests passed their repository checks, received an approving assessment, had all review conversations resolved, and merged through the normal protected branch path.
+The current organization rollout covers 25 transferred caller repositories. Thirteen migration pull requests passed their repository checks, received an approving assessment, had all review conversations resolved, and merged through the normal protected branch path.
 
-Twelve historical pull requests remained drafts with automatic merge disabled because their repository checks exposed preexisting project problems. Transferred Minecraft pull requests now resolve under MCEnvision through GitHub transfer redirects. Unrelated personal repositories remain under EnVisione. The failures include compilation errors, missing dependencies or wrapper files, frontend lint failures, a missing Node.js lockfile, and existing test failures.
+Twelve pull requests remain drafts with automatic merge disabled because their repository checks exposed project specific failures. Every transferred caller's default branch or active pull request head references the reviewed shared workflow commit `e6c466f88edb57af854f597e1ce3788881d49b21`. Transferred Minecraft pull requests resolve under MCEnvision through GitHub transfer redirects. Unrelated personal repositories remain under EnVisione.
 
 No held repository was merged. Repairing one of these repositories requires its own scoped change, successful checks, resolved review feedback, and a fresh merge decision.
 
