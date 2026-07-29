@@ -32,6 +32,7 @@ module PathFlowConfig implements DataFlow::ConfigSig {
 }
 
 module PathFlow = DataFlow::Global<PathFlowConfig>;
+import PathFlow::PathGraph
 
 from PathFlow::PathNode source, PathFlow::PathNode sink
 where PathFlow::flowPath(source, sink)

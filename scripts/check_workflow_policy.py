@@ -96,14 +96,26 @@ def validate(root: Path) -> list[str]:
     if query_files:
         for path in query_files:
             relative = path.relative_to(root).as_posix()
+            query_text = path.read_text(encoding="utf-8", errors="replace")
             for number, line in enumerate(
-                path.read_text(encoding="utf-8", errors="replace").splitlines(),
+                query_text.splitlines(),
                 start=1,
             ):
                 if re.search(r"\bMethodAccess\b", line):
                     errors.append(
                         f"{relative}:{number}: use the supported Java CodeQL MethodCall type"
                     )
+            if (
+                "@kind path-problem" in query_text
+                and not re.search(
+                    r"^\s*import\s+\w+::PathGraph\s*$",
+                    query_text,
+                    flags=re.MULTILINE,
+                )
+            ):
+                errors.append(
+                    f"{relative}: path-problem queries must import their PathGraph"
+                )
 
         validation_workflow = root / QUERY_VALIDATION_WORKFLOW
         if not validation_workflow.is_file():
