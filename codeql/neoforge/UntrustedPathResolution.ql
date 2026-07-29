@@ -18,7 +18,7 @@ class ParameterSource extends DataFlow::Node {
 
 class PathResolveSink extends DataFlow::Node {
   PathResolveSink() {
-    exists(MethodAccess call |
+    exists(MethodCall call |
       call.getMethod().getName() = "resolve" and
       call.getMethod().getDeclaringType().hasQualifiedName("java.nio.file", "Path") and
       this.asExpr() = call.getArgument(0)

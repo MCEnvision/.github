@@ -22,6 +22,8 @@ AUDITED_REPOSITORIES = {
     "trufflesecurity/trufflehog",
 }
 SHARED_CODEQL_QUERY_ROOT = ".github-central/codeql/"
+LOCAL_CODEQL_QUERY_ROOT = Path("codeql/neoforge")
+QUERY_VALIDATION_WORKFLOW = Path(".github/workflows/repository-quality.yml")
 
 
 def workflow_files(root: Path) -> list[Path]:
@@ -89,6 +91,40 @@ def validate(root: Path) -> list[str]:
             failure = validate_target(target)
             if failure:
                 errors.append(f"{relative}:{number}: {target}, {failure}")
+    query_root = root / LOCAL_CODEQL_QUERY_ROOT
+    query_files = sorted(query_root.rglob("*.ql")) if query_root.is_dir() else []
+    if query_files:
+        for path in query_files:
+            relative = path.relative_to(root).as_posix()
+            for number, line in enumerate(
+                path.read_text(encoding="utf-8", errors="replace").splitlines(),
+                start=1,
+            ):
+                if re.search(r"\bMethodAccess\b", line):
+                    errors.append(
+                        f"{relative}:{number}: use the supported Java CodeQL MethodCall type"
+                    )
+
+        validation_workflow = root / QUERY_VALIDATION_WORKFLOW
+        if not validation_workflow.is_file():
+            errors.append(
+                f"{QUERY_VALIDATION_WORKFLOW.as_posix()}: "
+                "custom query pack compilation is missing"
+            )
+        else:
+            workflow_text = validation_workflow.read_text(
+                encoding="utf-8", errors="replace"
+            )
+            if "github/codeql-action/setup-codeql@" not in workflow_text:
+                errors.append(
+                    f"{QUERY_VALIDATION_WORKFLOW.as_posix()}: "
+                    "custom query validation must install the pinned CodeQL CLI"
+                )
+            if "query compile --check-only" not in workflow_text:
+                errors.append(
+                    f"{QUERY_VALIDATION_WORKFLOW.as_posix()}: "
+                    "custom query validation must compile the complete query pack"
+                )
     return errors
 
 
