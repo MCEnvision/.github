@@ -3,6 +3,10 @@ name: shared release validation
 on:
   workflow_call:
     inputs:
+      shared-ref:
+        required: false
+        type: string
+        default: "main"
       java-version:
         required: false
         type: string
@@ -50,7 +54,7 @@ jobs:
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
           repository: EnVisione/.github
-          ref: main
+          ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Set up Java
         if: ${{ inputs.gradle-enabled }}
