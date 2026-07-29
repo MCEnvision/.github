@@ -22,6 +22,14 @@ class NodeRunnerTest(unittest.TestCase):
             self.assertEqual(install, ["npm", "ci"])
             self.assertEqual(command, ["npm", "run"])
 
+    def test_yarn_lockfile_selects_immutable_install(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "yarn.lock").write_text("", encoding="utf-8")
+            install, command = commands_for_root(root)
+            self.assertEqual(install, ["yarn", "install", "--immutable"])
+            self.assertEqual(command, ["yarn", "run"])
+
     def test_missing_lockfile_fails(self) -> None:
         with TemporaryDirectory() as directory:
             with self.assertRaisesRegex(FileNotFoundError, "supported lockfile"):

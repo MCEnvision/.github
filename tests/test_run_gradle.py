@@ -16,6 +16,10 @@ class GradleRunnerTest(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "invalid task names"):
             parse_tasks("build && whoami")
 
+    def test_gradle_options_are_rejected(self) -> None:
+        with self.assertRaisesRegex(ValueError, "invalid task names"):
+            parse_tasks("build --scan")
+
     def test_linux_wrapper_command(self) -> None:
         with TemporaryDirectory() as directory:
             root = Path(directory)

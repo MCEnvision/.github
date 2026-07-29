@@ -19,7 +19,11 @@ def parse_tasks(value: str) -> list[str]:
     tasks = shlex.split(value)
     if not tasks:
         raise ValueError("no tasks were configured")
-    invalid = [task for task in tasks if not TASK_PATTERN.fullmatch(task)]
+    invalid = [
+        task
+        for task in tasks
+        if task.startswith("-") or not TASK_PATTERN.fullmatch(task)
+    ]
     if invalid:
         raise ValueError("invalid task names, " + ", ".join(invalid))
     return tasks
