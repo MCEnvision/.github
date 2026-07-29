@@ -23,7 +23,7 @@ The dependency submission job runs only on the default branch after a push or ma
 
 The dependency review job runs only for pull requests when native dependency review is available. Public repositories support it. Private repositories owned by a personal account require a compatible GitHub Code Security plan and must leave the job disabled otherwise.
 
-The CodeQL job runs only when native code scanning is available and the caller supplies supported languages. Public repositories support this. Private personal repositories on GitHub Pro do not receive native CodeQL unless their plan changes.
+The CodeQL job runs only when native code scanning is available and the caller supplies supported languages. Public repositories support this. Private personal repositories on GitHub Pro do not receive native CodeQL unless their plan changes. Manual Gradle extraction receives a larger heap and runs Kotlin compilation in process to avoid instrumentation overhead exhausting the runner.
 
 The documentation job runs when the caller enables `enforce-docs-layout`. It validates the root README, required documentation files, internal Markdown links, and documentation updates accompanying implementation changes. Migration callers may leave it disabled until repository onboarding has established the required documentation layout.
 
