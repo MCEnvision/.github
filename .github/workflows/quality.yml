@@ -43,13 +43,8 @@ on:
         required: false
         type: string
         default: "."
-      codeql-languages:
-        description: JSON array of CodeQL languages.
-        required: false
-        type: string
-        default: "[]"
       native-security:
-        description: Enable CodeQL and dependency review only when GitHub supports them.
+        description: Enable dependency review only when GitHub supports it.
         required: false
         type: boolean
         default: false
@@ -177,34 +172,6 @@ jobs:
         working-directory: ${{ inputs.node-working-directory }}
         run: python "${{ github.workspace }}/.github-central/scripts/run_node_checks.py"
 
-  dependency-submission:
-    name: dependency submission
-    if: >-
-      ${{
-        inputs.gradle-enabled &&
-        github.actor != 'dependabot[bot]' &&
-        (
-          github.event_name == 'workflow_dispatch' ||
-          (
-            github.event_name == 'push' &&
-            github.ref == format('refs/heads/{0}', github.event.repository.default_branch)
-          )
-        )
-      }}
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Check out caller
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Set up Java
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
-        with:
-          distribution: temurin
-          java-version: ${{ inputs.java-version }}
-      - name: Submit Gradle dependency graph
-        uses: gradle/actions/dependency-submission@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
-
   dependency-review:
     name: dependency review
     if: >-
@@ -224,53 +191,3 @@ jobs:
           deny-packages: ${{ inputs.denied-packages }}
           retry-on-snapshot-warnings: true
           retry-on-snapshot-warnings-timeout: 180
-
-  codeql:
-    name: codeql, ${{ matrix.language }}
-    if: >-
-      ${{
-        inputs.native-security &&
-        inputs.codeql-languages != '[]' &&
-        github.actor != 'dependabot[bot]'
-      }}
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ${{ fromJSON(inputs.codeql-languages) }}
-    runs-on: ubuntu-latest
-    permissions:
-      actions: read
-      contents: read
-      security-events: write
-    steps:
-      - name: Check out caller
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-      - name: Check out shared validation
-        if: ${{ matrix.language == 'java-kotlin' }}
-        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
-        with:
-          repository: EnVisione/.github
-          ref: ${{ inputs.shared-ref }}
-          path: .github-central
-      - name: Set up Java
-        if: ${{ matrix.language == 'java-kotlin' }}
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
-        with:
-          distribution: temurin
-          java-version: ${{ inputs.java-version }}
-      - name: Set up Gradle
-        if: ${{ matrix.language == 'java-kotlin' && inputs.gradle-enabled }}
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4
-        with:
-          languages: ${{ matrix.language }}
-          build-mode: ${{ matrix.language == 'java-kotlin' && 'manual' || 'none' }}
-      - name: Build Java for CodeQL
-        if: ${{ matrix.language == 'java-kotlin' && inputs.gradle-enabled }}
-        env:
-          GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dkotlin.compiler.execution.strategy=in-process
-          GRADLE_TASKS: ${{ inputs.gradle-tasks }}
-        run: python .github-central/scripts/run_gradle.py --tasks "$GRADLE_TASKS"
-      - name: Analyze
-        uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4

@@ -8,7 +8,7 @@ This repository is the shared implementation layer for GitHub validation across 
 
 ### Quality Workflow
 
-The quality workflow is callable through `workflow_call`. Its jobs are intentionally independent so GitHub reports precise check names and unrelated ecosystems can skip cleanly.
+The quality workflow is callable through `workflow_call`. Its read-only jobs are intentionally independent so GitHub reports precise check names and unrelated ecosystems can skip cleanly.
 
 Callers pin the reusable workflow to a reviewed central commit and pass that same commit through `shared-ref`. Every shared script checkout therefore matches the workflow definition that selected it.
 
@@ -21,15 +21,19 @@ The Gradle job:
 5. Runs configured GameTest tasks when present.
 6. Uploads test reports on failure.
 
-The dependency submission job runs only on the default branch after a push or manual dispatch. It submits Gradle's resolved dependency graph, including transitive dependencies.
-
 The dependency review job runs only for pull requests when native dependency review is available. Public repositories support it. Private repositories owned by a personal account require a compatible GitHub Code Security plan and must leave the job disabled otherwise.
-
-The CodeQL job runs only when native code scanning is available and the caller supplies supported languages. Public repositories support this. Private personal repositories on GitHub Pro do not receive native CodeQL unless their plan changes. Manual Gradle extraction receives a larger heap and runs Kotlin compilation in process to avoid instrumentation overhead exhausting the runner.
 
 The documentation job runs when the caller enables `enforce-docs-layout`. It validates the root README, required documentation files, internal Markdown links, and documentation updates accompanying implementation changes. Migration callers may leave it disabled until repository onboarding has established the required documentation layout.
 
 The secret scan uses a pinned TruffleHog release and reports verified and unknown findings. GitHub secret scanning and push protection remain separate native repository controls.
+
+### Privileged Workflows
+
+GitHub validates the complete permission graph of a reusable workflow before it evaluates job conditions. A skipped job cannot request permissions that its caller did not grant. Dependency submission and CodeQL therefore use dedicated reusable workflows instead of sharing the read-only quality workflow.
+
+The dependency submission workflow runs only from a caller job gated to a trusted default-branch push or manual dispatch. It receives `contents: write` and submits Gradle's resolved dependency graph, including transitive dependencies.
+
+The CodeQL workflow runs only when native code scanning is available and the caller supplies supported languages. It receives `security-events: write` without repository content write access. Public repositories support it. Private personal repositories on GitHub Pro do not receive native CodeQL unless their plan changes. Manual Gradle extraction receives a larger heap and runs Kotlin compilation in process to avoid instrumentation overhead exhausting the runner.
 
 ### Release Validation Workflow
 
@@ -64,7 +68,7 @@ The standard caller supplies:
 
 Caller workflows must not pass publication credentials to the quality workflow. Release credentials belong in separate `curseforge`, `modrinth`, or `production` environments and are available only to jobs that explicitly reference those environments.
 
-Pull request callers grant read access plus `security-events: write` only when CodeQL is enabled. Trusted default-branch, scheduled, and manual callers may grant `contents: write` for Gradle dependency submission. Disabled jobs do not receive unused write scopes.
+The baseline quality call receives read access only. A separate CodeQL call receives `security-events: write` only when supported languages are enabled. A separate dependency submission call receives `contents: write` only on trusted default-branch pushes or manual runs. Disabled capabilities do not appear in the caller permission graph.
 
 ## Branch and Merge Controls
 
