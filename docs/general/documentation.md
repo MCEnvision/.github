@@ -111,7 +111,7 @@ The current rollout covers 29 eligible repositories. The central workflow reposi
 
 Seventeen migration pull requests passed their repository checks, received an approving assessment, had all review conversations resolved, and merged through the normal protected branch path.
 
-Twelve pull requests remain drafts with automatic merge disabled because their repository checks expose preexisting project problems. The held repositories are SEFPorted, ricelabswebsite, ricelabs status relay, Playtime, Over Stars Content, MobStackerPlus, maxlogger, FixWaterJump, emi gamestages integration, CreateFixes, CreateDupePatch, and FutureShops. Their failures include compilation errors, missing dependencies or wrapper files, frontend lint failures, a missing Node.js lockfile, and existing test failures.
+Twelve pull requests remain drafts with automatic merge disabled because their repository checks expose preexisting project problems. The held repositories are `EnVisione/SEFPorted`, `EnVisione/ricelabswebsite`, `EnVisione/ricelabs-status-relay`, `EnVisione/Playtime`, `EnVisione/Over-Stars-Content`, `EnVisione/MobStackerPlus`, `EnVisione/maxlogger`, `EnVisione/FixWaterJump`, `EnVisione/emi-gamestages-integration`, `EnVisione/CreateFixes`, `EnVisione/CreateDupePatch`, and `EnVisione/FutureShops`. Their failures include compilation errors, missing dependencies or wrapper files, frontend lint failures, a missing Node.js lockfile, and existing test failures.
 
 No held repository was merged. Repairing one of these repositories requires its own scoped change, successful checks, resolved review feedback, and a fresh merge decision.
 
