@@ -88,6 +88,14 @@ Every repository-scoped task begins with a quiet read-only preflight. It checks 
 
 Actionable feedback is verified before implementation. Valid findings update the plan, issue, Project item, implementation, tests, and documentation. Incorrect or inapplicable findings receive an evidence-based resolution. No feedback is silently accepted, silently ignored, or treated as a replacement for deterministic verification.
 
+## Fleet Workflow Migration
+
+Existing active repositories migrate through signed draft pull requests on `envy/central-workflow-migration`. The migration runs from temporary clones, so active local worktrees and phase branches remain untouched.
+
+Each migration replaces copied generic build and CodeQL workflows with thin callers. Repository-specific smoke tests, schema validation, publication, deployment, and other custom workflows remain in place. A repository with the standard documentation tree enables documentation enforcement immediately. A legacy repository keeps that check disabled until its documentation is migrated without mixing unrelated file movement into the workflow pull request.
+
+The current rollout covers 29 eligible repositories. The central workflow repository, CodexGateway, the EnVisione profile repository, and the GitHub Pages repository remain outside this migration.
+
 ## Capability Boundaries
 
 - Dependency review and native CodeQL are available for public repositories and compatible licensed private repositories.
