@@ -4,3 +4,4 @@
 - [Implementation plan](general/plan.md)
 - [Security model](security/security-model.md)
 - [Release verification](release/release-verification.md)
+- [Root README](../README.md)

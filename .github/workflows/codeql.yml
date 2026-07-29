@@ -22,6 +22,10 @@ on:
       languages:
         required: true
         type: string
+      neoforge-enabled:
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   analyze:
@@ -32,6 +36,7 @@ jobs:
       matrix:
         language: ${{ fromJSON(inputs.languages) }}
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     permissions:
       actions: read
       contents: read
@@ -43,7 +48,7 @@ jobs:
         if: ${{ matrix.language == 'java-kotlin' }}
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: EnVisione/.github
+          repository: MCEnvision/.github
           ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Set up Java
@@ -60,6 +65,12 @@ jobs:
         with:
           languages: ${{ matrix.language }}
           build-mode: ${{ matrix.language == 'java-kotlin' && 'manual' || 'none' }}
+          queries: >-
+            ${{
+              matrix.language == 'java-kotlin' && inputs.neoforge-enabled &&
+              'security-extended,.github-central/codeql/neoforge/neoforge-security.qls' ||
+              'security-extended'
+            }}
       - name: Build Java for CodeQL
         if: ${{ matrix.language == 'java-kotlin' && inputs.gradle-enabled }}
         env:

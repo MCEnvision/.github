@@ -16,6 +16,18 @@ def run(command: list[str]) -> int:
     return subprocess.run(command, check=False).returncode
 
 
+def commands_for_root(root: Path) -> tuple[list[str], list[str]]:
+    if (root / "pnpm-lock.yaml").is_file():
+        return ["pnpm", "install", "--frozen-lockfile"], ["pnpm", "run"]
+    if (root / "yarn.lock").is_file():
+        return ["yarn", "install", "--immutable"], ["yarn", "run"]
+    if (root / "package-lock.json").is_file() or (
+        root / "npm-shrinkwrap.json"
+    ).is_file():
+        return ["npm", "ci"], ["npm", "run"]
+    raise FileNotFoundError("a supported lockfile is required")
+
+
 def main() -> int:
     package = Path("package.json")
     if not package.is_file():
@@ -23,17 +35,10 @@ def main() -> int:
         return 1
     payload = json.loads(package.read_text(encoding="utf-8"))
     scripts = payload.get("scripts", {}) if isinstance(payload, dict) else {}
-    if Path("pnpm-lock.yaml").is_file():
-        install = ["pnpm", "install", "--frozen-lockfile"]
-        command = ["pnpm", "run"]
-    elif Path("yarn.lock").is_file():
-        install = ["yarn", "install", "--immutable"]
-        command = ["yarn", "run"]
-    elif Path("package-lock.json").is_file() or Path("npm-shrinkwrap.json").is_file():
-        install = ["npm", "ci"]
-        command = ["npm", "run"]
-    else:
-        print("node error: a supported lockfile is required", file=sys.stderr)
+    try:
+        install, command = commands_for_root(Path.cwd())
+    except FileNotFoundError as error:
+        print(f"node error: {error}", file=sys.stderr)
         return 1
     result = run(install)
     if result:

@@ -38,3 +38,97 @@
 - [x] Check all GitHub layers quietly at the start of every repository-scoped request.
 - [x] Reconcile actionable review, security, dependency, CI, issue, Project, milestone, wiki, and release feedback.
 - [x] Keep plans and canonical documentation synchronized with verified implementation.
+
+## Phase 5. Organization Migration and Cost Guardrails
+
+### Objective
+
+Move the Minecraft repository fleet to the paid `MCEnvision` Team organization without adding seats or enabling metered overages. Preserve repository identity, pull requests, issues, releases, settings, redirects, and local worktrees.
+
+### Completed Migration
+
+- [x] Audit organization membership, collaborators, plan, billing budgets, repository visibility, forks, and name collisions before transfer.
+- [x] Transfer the shared workflow repository and 24 Minecraft repositories from `EnVisione` to `MCEnvision`.
+- [x] Verify all 25 transferred repository identities and GitHub redirects.
+- [x] Update the Windows shared workflow clone and all 12 discovered node1 clones that still referenced the former owner.
+- [x] Update repository onboarding so Minecraft repositories resolve under `MCEnvision`, while unrelated personal repositories remain under `EnVisione`.
+- [x] Update missing Git behavior to search both the current organization and legacy redirects before creating a private repository under `MCEnvision`.
+- [x] Record the ownership, remote reconciliation, and no duplicate repository rules in persistent operating context.
+
+### Cost Constraints
+
+- [x] Verify the organization remains on GitHub Team with two existing members and no outside collaborators.
+- [x] Verify hard zero dollar budgets with further usage blocked for Actions, Codespaces, Packages, and Git LFS.
+- [ ] Add a recurring read only billing and usage audit that reports approaching included limits without changing budgets or purchasing capacity.
+- [ ] Keep standard public repository Actions and public CodeQL enabled because they do not consume paid minutes.
+- [ ] Conserve private repository included Actions minutes with path filters, per branch concurrency cancellation, explicit timeouts, and short routine artifact retention.
+- [ ] Never enable paid private repository code security, GitHub Code Quality, Copilot seats or overages, larger runners, additional organization seats, or another metered feature without explicit cost approval.
+
+### Acceptance Criteria
+
+- Every transferred repository resolves under `MCEnvision`, and every discovered clone uses the new remote.
+- No repository is duplicated when a local project lacks `.git`.
+- Transfer and workflow migration add no organization member, outside collaborator, paid security license, or metered overage.
+- Hard zero dollar budgets remain enabled and continue blocking further metered usage.
+
+## Phase 6. Cost Safe Supply Chain Hardening
+
+### Actions Policy and Workflow Resources
+
+- [ ] Require full commit SHA pinning in the shared repository and, where authorization allows, across the organization.
+- [ ] Restrict Actions to GitHub owned actions and an audited allowlist for Gradle, TruffleHog, Anchore, and OpenSSF.
+- [ ] Reject unpinned reusable workflows and unknown action publishers during central validation.
+- [ ] Add per branch concurrency cancellation to event caller workflows.
+- [ ] Add explicit job timeouts to every reusable workflow job.
+- [ ] Retain routine test evidence for seven days and release evidence for thirty days.
+- [ ] Remove the weekly central validation schedule. Dependabot retains its weekly update schedule, while code and security validation remain event driven.
+
+### Central Repository Self Verification
+
+- [ ] Add Python and GitHub Actions CodeQL with the security extended query suite.
+- [ ] Add focused unit tests for Gradle task parsing, Node.js package manager selection, workflow policy validation, and release verification.
+- [ ] Add OpenSSF Scorecard for the public shared repository and publish its SARIF result to the Security tab.
+- [ ] Keep every external action at an individually reviewed full commit SHA.
+- [ ] Audit the four pending major action upgrades independently before merging any upgrade.
+
+### NeoForge Security Queries
+
+- [ ] Add a versioned CodeQL query pack for NeoForge repositories.
+- [ ] Detect client classes entering common initialization or dedicated server paths.
+- [ ] Detect packet handlers that mutate state without validating logical side, sender, bounds, entity or level availability, or thread context.
+- [ ] Detect commands that perform privileged mutations without an explicit permission requirement.
+- [ ] Detect untrusted filesystem paths and traversal into configuration or generated data writes.
+- [ ] Detect hazardous serialization and network values with missing size or range bounds.
+- [ ] Run the custom pack only for applicable Java and NeoForge callers, alongside GitHub security extended queries.
+
+### Release Integrity
+
+- [ ] Add protected version and phase tag rulesets that block deletion, replacement, and unsigned creation.
+- [ ] Require release validation to verify an annotated signed tag for tag initiated releases.
+- [ ] Verify artifact attestations against the expected owner, repository, reusable workflow, source commit, and digest before external upload.
+- [ ] Record GitHub Release, CurseForge, Modrinth, staging, and production publication as GitHub Deployments with artifact digest, target version, environment, result, and rollback relationship.
+- [ ] Preserve checksums, source commit manifest, SPDX SBOM, and attestation evidence for every supported release.
+
+### GitHub Native Development Guidance
+
+- [ ] Add organization level GitHub Copilot skills for NeoForge implementation, issue investigation, security review, release preparation, documentation, GameTests, and pull request auditing.
+- [ ] Add corresponding GitHub Copilot custom agents with least privilege tool access and evidence based completion gates.
+- [ ] Store the shared skills and agents in this organization `.github` repository so member repositories inherit them.
+- [ ] Do not purchase Copilot seats or invoke metered cloud agent work automatically. Configuration may be present while execution remains user initiated and entitlement aware.
+
+### Secrets, Apps, and Runners
+
+- [ ] Add audited custom secret patterns for Modrinth, CurseForge, Discord, Cloudflare, database URLs, and release broker credentials where the organization plan supports them without an added charge.
+- [ ] Dry run every custom pattern against repository history before enabling push protection.
+- [ ] Define GitHub App authentication for the separate gateway integration with signed webhook verification, short lived installation tokens, per repository permissions, idempotent delivery processing, and a failed delivery replay queue.
+- [ ] Keep gateway implementation changes separate while its active update is in progress.
+- [ ] Document an optional ephemeral node1 runner that is private repository only, single job, isolated, and wiped after each job.
+- [ ] Never dispatch public repository or fork pull request code to node1.
+
+### Fleet Rollout
+
+- [ ] Merge the shared hardening pull request only after local checks, GitHub Actions, CodeQL, Scorecard, secret scanning, and Copilot findings are resolved.
+- [ ] Pin every caller to the reviewed shared merge commit.
+- [ ] Update transferred migration pull requests and open deduplicated migration pull requests for remaining caller drift.
+- [ ] Merge only callers whose required checks pass. Keep repositories with preexisting failures open for scoped repair.
+- [ ] Verify final organization ownership, caller revisions, Actions policies, tag rulesets, environments, security state, Projects, milestones, wiki links, and zero additional billed usage.
