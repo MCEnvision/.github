@@ -76,6 +76,6 @@ jobs:
         env:
           GRADLE_OPTS: -Dorg.gradle.jvmargs=-Xmx4g -Dkotlin.compiler.execution.strategy=in-process
           GRADLE_TASKS: ${{ inputs.gradle-tasks }}
-        run: python .github-central/scripts/run_gradle.py --tasks "$GRADLE_TASKS"
+        run: python .github-central/scripts/run_gradle.py --tasks "$GRADLE_TASKS" --force-execution
       - name: Analyze
         uses: github/codeql-action/analyze@e4fba868fa4b1b91e1fdab776edc8cfbe6e9fb81 # v4

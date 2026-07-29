@@ -30,23 +30,36 @@ def parse_tasks(value: str) -> list[str]:
 
 
 def wrapper_command(
-    tasks: list[str], root: Path, platform_name: str
+    tasks: list[str],
+    root: Path,
+    platform_name: str,
+    *,
+    force_execution: bool = False,
 ) -> tuple[Path, list[str]]:
     wrapper = root / ("gradlew.bat" if platform_name == "nt" else "gradlew")
     if not wrapper.is_file():
         raise FileNotFoundError("checked-in Gradle Wrapper is missing")
+    options = ["--no-daemon"]
+    if force_execution:
+        options.extend(["--no-build-cache", "--rerun-tasks"])
     if platform_name == "nt":
-        return wrapper, [str(wrapper), "--no-daemon", *tasks]
-    return wrapper, [f"./{wrapper.name}", "--no-daemon", *tasks]
+        return wrapper, [str(wrapper), *options, *tasks]
+    return wrapper, [f"./{wrapper.name}", *options, *tasks]
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--tasks", required=True)
+    parser.add_argument("--force-execution", action="store_true")
     args = parser.parse_args()
     try:
         tasks = parse_tasks(args.tasks)
-        wrapper, command = wrapper_command(tasks, Path.cwd(), os.name)
+        wrapper, command = wrapper_command(
+            tasks,
+            Path.cwd(),
+            os.name,
+            force_execution=args.force_execution,
+        )
     except (FileNotFoundError, ValueError) as error:
         print(f"gradle error: {error}", file=sys.stderr)
         return 1

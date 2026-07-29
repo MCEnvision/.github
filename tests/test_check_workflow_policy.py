@@ -63,6 +63,28 @@ class WorkflowPolicyValidationTest(unittest.TestCase):
             )
             self.assertEqual(validate(root), [])
 
+    def test_codeql_gradle_extraction_requires_forced_execution(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            workflows = root / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            workflow = workflows / "codeql.yml"
+            workflow.write_text(
+                "run: python .github-central/scripts/run_gradle.py "
+                '--tasks "$GRADLE_TASKS"\n',
+                encoding="utf-8",
+            )
+            errors = validate(root)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("must force execution", errors[0])
+
+            workflow.write_text(
+                "run: python .github-central/scripts/run_gradle.py "
+                '--tasks "$GRADLE_TASKS" --force-execution\n',
+                encoding="utf-8",
+            )
+            self.assertEqual(validate(root), [])
+
 
 if __name__ == "__main__":
     unittest.main()

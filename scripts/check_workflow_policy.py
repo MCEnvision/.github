@@ -74,6 +74,14 @@ def validate(root: Path) -> list[str]:
                 errors.append(
                     f"{relative}:{number}: shared CodeQL query paths must begin with ./"
                 )
+            if (
+                relative == ".github/workflows/codeql.yml"
+                and "scripts/run_gradle.py" in line
+                and "--force-execution" not in line
+            ):
+                errors.append(
+                    f"{relative}:{number}: CodeQL Gradle extraction must force execution"
+                )
             match = USES_PATTERN.match(line)
             if not match:
                 continue

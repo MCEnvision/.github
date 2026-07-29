@@ -137,12 +137,14 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 
 #### Current Evidence
 
-The first organization caller rollout exposed one shared CodeQL configuration defect. NeoForge callers pass `.github-central/codeql/neoforge/neoforge-security.qls` as a query specifier. Without a leading `./`, CodeQL interprets the value as an external repository specifier and stops during database initialization before analysis begins. This failure affects callers that enable the NeoForge query pack and is independent of their source code.
+The first organization caller rollout exposed two shared CodeQL configuration defects. NeoForge callers originally passed `.github-central/codeql/neoforge/neoforge-security.qls` as a query specifier. Without a leading `./`, CodeQL interpreted the value as an external repository specifier and stopped during database initialization before analysis began. After correcting that path, Java callers with otherwise successful Gradle builds showed a second failure. Gradle restored compilation output from cache, so the manually traced CodeQL build observed no compiler execution and failed database finalization with `CodeQL could not process any code written in Java/Kotlin`. Both failures are independent of caller source behavior.
 
 #### Objective and Scope
 
 - [ ] Correct the shared NeoForge query suite reference to an explicit repository local path.
 - [ ] Extend central workflow policy validation and tests so a local CodeQL query suite cannot lose its `./` prefix without failing verification.
+- [ ] Add a dedicated forced execution mode to the validated Gradle runner. Use it only for manual CodeQL extraction to disable the build cache and rerun configured tasks without accepting arbitrary caller supplied Gradle options.
+- [ ] Test normal cached command construction and forced CodeQL command construction on Linux and Windows.
 - [ ] Verify the repair with the central Python test suite, workflow policy validator, documentation validator, release validator, and GitHub Actions.
 - [ ] Merge the repair through a reviewed pull request, then repin each still open caller migration pull request to the repaired merge commit.
 - [ ] Reevaluate every caller after repinning. Merge only callers with successful deterministic checks, no requested changes, no unresolved actionable feedback, and a mergeable head.
@@ -150,6 +152,7 @@ The first organization caller rollout exposed one shared CodeQL configuration de
 #### Non Goals and Failure Handling
 
 - Do not weaken CodeQL, disable the NeoForge query pack, bypass a failed check, or merge a repository with an unrelated build or test failure.
+- Do not disable caching for ordinary quality builds. Forced execution is limited to CodeQL extraction.
 - Do not change Minecraft, NeoForge, Gradle, mappings, dependencies, or repository implementation merely to complete the workflow migration.
 - Keep repositories with independent failures in draft with automatic merge disabled. Record their exact failing gate for a later scoped repair.
 
