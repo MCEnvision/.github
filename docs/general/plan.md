@@ -19,8 +19,8 @@
 ## Phase 3. Fleet Rollout
 
 - [ ] Apply supported remote settings to owned active repositories.
-- [ ] Preserve dirty worktrees, active phase branches, forks, archives, examples, and excluded repositories.
-- [ ] Schedule caller-workflow migration through each repository's safe phase workflow.
+- [x] Preserve local worktrees, active phase branches, forks, archives, and excluded repositories. Include example repositories only when they are explicitly placed in rollout scope.
+- [x] Open signed draft caller-workflow migration pull requests for all 29 eligible repositories. Preserve repository-specific verification and replace only copied generic workflows.
 - [ ] Verify zero remote drift after rollout.
 
 ## Phase 4. Continuous Reconciliation
