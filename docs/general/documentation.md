@@ -107,6 +107,14 @@ Caller generation detects a root or nested locked Node.js project. It enables No
 
 The current rollout covers 29 eligible repositories. The central workflow repository, CodexGateway, the EnVisione profile repository, and the GitHub Pages repository remain outside this migration.
 
+### Rollout Result
+
+Seventeen migration pull requests passed their repository checks, received an approving assessment, had all review conversations resolved, and merged through the normal protected branch path.
+
+Twelve pull requests remain drafts with automatic merge disabled because their repository checks expose preexisting project problems. The held repositories are SEFPorted, ricelabswebsite, ricelabs status relay, Playtime, Over Stars Content, MobStackerPlus, maxlogger, FixWaterJump, emi gamestages integration, CreateFixes, CreateDupePatch, and FutureShops. Their failures include compilation errors, missing dependencies or wrapper files, frontend lint failures, a missing Node.js lockfile, and existing test failures.
+
+No held repository was merged. Repairing one of these repositories requires its own scoped change, successful checks, resolved review feedback, and a fresh merge decision.
+
 ## Capability Boundaries
 
 - Dependency review and native CodeQL are available for public repositories and compatible licensed private repositories.
