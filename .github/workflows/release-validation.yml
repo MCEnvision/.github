@@ -40,6 +40,7 @@ jobs:
   validate-release:
     name: release validation
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     environment: ${{ inputs.environment }}
     permissions:
       contents: read
@@ -53,7 +54,7 @@ jobs:
       - name: Check out shared validation
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: EnVisione/.github
+          repository: MCEnvision/.github
           ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Set up Java
@@ -77,6 +78,11 @@ jobs:
           python .github-central/scripts/check_release.py
           --artifact-glob "$ARTIFACT_GLOB"
           --output-directory release-validation
+      - name: Verify signed annotated release tag
+        if: ${{ github.ref_type == 'tag' }}
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python .github-central/scripts/verify_release_tag.py
       - name: Generate SPDX SBOM
         uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
         with:
@@ -97,6 +103,17 @@ jobs:
         with:
           subject-path: ${{ inputs.artifact-glob }}
           sbom-path: release-validation/release.spdx.json
+      - name: Verify release attestations
+        if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
+        env:
+          ARTIFACT_GLOB: ${{ inputs.artifact-glob }}
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python .github-central/scripts/verify_attestations.py
+          --artifact-glob "$ARTIFACT_GLOB"
+          --repository "$GITHUB_REPOSITORY"
+          --signer-repository "MCEnvision/.github"
+          --signer-workflow "MCEnvision/.github/.github/workflows/release-validation.yml"
       - name: Retain validated release bundle
         uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
         with:

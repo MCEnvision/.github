@@ -2,7 +2,7 @@
 
 ## Purpose
 
-This repository is the shared implementation layer for GitHub validation across EnVisione repositories. Each caller repository defines when checks run and passes repository-specific inputs. The called workflows own the actual implementation.
+This repository is the shared implementation layer for GitHub validation across MCEnvision repositories. Each caller repository defines when checks run and passes repository specific inputs. The called workflows own the actual implementation.
 
 ## Workflow Topology
 
@@ -27,13 +27,19 @@ The documentation job runs when the caller enables `enforce-docs-layout`. It val
 
 The secret scan uses a pinned TruffleHog release and reports verified and unknown findings. GitHub secret scanning and push protection remain separate native repository controls.
 
+Every job has an explicit timeout. Routine Gradle test evidence is retained for seven days. Event caller workflows cancel superseded pull request runs for the same branch.
+
 ### Privileged Workflows
 
 GitHub validates the complete permission graph of a reusable workflow before it evaluates job conditions. A skipped job cannot request permissions that its caller did not grant. Dependency submission and CodeQL therefore use dedicated reusable workflows instead of sharing the read-only quality workflow.
 
 The dependency submission workflow runs only from a caller job gated to a trusted default-branch push or manual dispatch. It receives `contents: write` and submits Gradle's resolved dependency graph, including transitive dependencies.
 
-The CodeQL workflow runs only when native code scanning is available and the caller supplies supported languages. It receives `security-events: write` without repository content write access. Public repositories support it. Private personal repositories on GitHub Pro do not receive native CodeQL unless their plan changes. Manual Gradle extraction receives a larger heap and runs Kotlin compilation in process to avoid instrumentation overhead exhausting the runner.
+The CodeQL workflow runs only when native code scanning is available and the caller supplies supported languages. It receives `security-events: write` without repository content write access. Public repositories support it without paid minutes. Private repositories leave native code scanning disabled unless the existing organization entitlement supports it without additional charges. Manual Gradle extraction receives a larger heap and runs Kotlin compilation in process to avoid instrumentation overhead exhausting the runner.
+
+CodeQL always runs the security extended suite. Applicable NeoForge callers additionally load the versioned query pack from `codeql/neoforge`. The pack checks dedicated server client references, direct command permission gates, visible packet authority and thread validation, explicit network string bounds, and parameter flow into filesystem path resolution. These focused checks supplement GitHub standard queries and require repository evidence before a finding is accepted.
+
+The shared repository analyzes its own Python and GitHub Actions sources. OpenSSF Scorecard runs against the public default branch and uploads SARIF to code scanning.
 
 ### Release Validation Workflow
 
@@ -47,6 +53,7 @@ Release validation uses a protected GitHub environment selected by the caller. I
 6. Generates an SPDX JSON SBOM.
 7. Uploads a validation bundle.
 8. Creates build provenance and SBOM attestations for public repositories.
+9. Verifies each public artifact attestation against the caller repository, `MCEnvision/.github`, the release validation workflow, and the artifact digest.
 
 GitHub Pro supports artifact attestations for public repositories. Private repositories require GitHub Enterprise Cloud, so private callers retain the checksums, manifest, SBOM, and workflow evidence without attempting unsupported attestations.
 
@@ -97,6 +104,22 @@ Every repository-scoped task begins with a quiet read-only preflight. It checks 
 
 Actionable feedback is verified before implementation. Valid findings update the plan, issue, Project item, implementation, tests, and documentation. Incorrect or inapplicable findings receive an evidence-based resolution. No feedback is silently accepted, silently ignored, or treated as a replacement for deterministic verification.
 
+## Actions Policy and Cost Controls
+
+The central repository requires full commit SHA pinning and permits only GitHub owned actions plus audited Gradle, TruffleHog, Anchore, and OpenSSF repositories. `scripts/check_workflow_policy.py` independently validates every tracked workflow reference and rejects unknown publishers, tags, branches, and shortened revisions.
+
+The organization remains on GitHub Team with two existing members and no outside collaborators. Hard zero dollar budgets stop further metered Actions, Codespaces, Packages, and Git LFS use. Repository transfer does not add a seat. Adding an organization member or outside collaborator to private repositories can add a seat and remains outside automatic onboarding.
+
+Public standard Actions and public CodeQL do not consume paid minutes. Private repository workflows consume included Team minutes. Their event callers use per branch concurrency cancellation, explicit timeouts, path aware execution, and short routine retention. Paid private code security, GitHub Code Quality, Copilot seats or overages, larger runners, and any other paid capability remain disabled without explicit cost approval.
+
+Custom secret patterns require GitHub Secret Protection for organization repositories. They are documented but not enabled because the zero additional spend constraint takes priority.
+
+## GitHub Copilot Configuration
+
+Organization custom agents under `agents/` cover NeoForge implementation, issue investigation, security review, releases, documentation, GameTests, and pull request auditing. Repository skills under `.github/skills/` provide focused procedures for the same work.
+
+The files are passive configuration. They do not grant repository permissions, buy seats, or trigger cloud agent runs. Copilot execution remains entitlement aware and user initiated.
+
 ## Fleet Workflow Migration
 
 Existing active repositories migrate through signed draft pull requests on `envy/central-workflow-migration`. The migration runs from temporary clones, so active local worktrees and phase branches remain untouched.
@@ -105,13 +128,13 @@ Each migration replaces copied generic build and CodeQL workflows with thin call
 
 Caller generation detects a root or nested locked Node.js project. It enables Node.js validation only when both `package.json` and a supported lockfile exist, and passes the containing directory to the shared workflow.
 
-The current rollout covers 29 eligible repositories. The central workflow repository, CodexGateway, the EnVisione profile repository, and the GitHub Pages repository remain outside this migration.
+The historical caller rollout covered 29 repositories before the organization transfer. The current Minecraft fleet uses MCEnvision ownership. Unrelated personal repositories, the separate gateway integration, the EnVisione profile repository, and the GitHub Pages repository remain outside the organization migration.
 
 ### Rollout Result
 
 Seventeen migration pull requests passed their repository checks, received an approving assessment, had all review conversations resolved, and merged through the normal protected branch path.
 
-Twelve pull requests remain drafts with automatic merge disabled because their repository checks expose preexisting project problems. The held repositories are `EnVisione/SEFPorted`, `EnVisione/ricelabswebsite`, `EnVisione/ricelabs-status-relay`, `EnVisione/Playtime`, `EnVisione/Over-Stars-Content`, `EnVisione/MobStackerPlus`, `EnVisione/maxlogger`, `EnVisione/FixWaterJump`, `EnVisione/emi-gamestages-integration`, `EnVisione/CreateFixes`, `EnVisione/CreateDupePatch`, and `EnVisione/FutureShops`. Their failures include compilation errors, missing dependencies or wrapper files, frontend lint failures, a missing Node.js lockfile, and existing test failures.
+Twelve historical pull requests remained drafts with automatic merge disabled because their repository checks exposed preexisting project problems. Transferred Minecraft pull requests now resolve under MCEnvision through GitHub transfer redirects. Unrelated personal repositories remain under EnVisione. The failures include compilation errors, missing dependencies or wrapper files, frontend lint failures, a missing Node.js lockfile, and existing test failures.
 
 No held repository was merged. Repairing one of these repositories requires its own scoped change, successful checks, resolved review feedback, and a fresh merge decision.
 
@@ -122,3 +145,6 @@ No held repository was merged. Repairing one of these repositories requires its 
 - GitHub environment branch and tag restrictions are available for private repositories on GitHub Pro.
 - Copilot automatic review requires the pull request author to have access to Copilot review and available premium-request capacity.
 - Native secret scanning and push protection are enabled where the repository plan supports them. The central secret scan remains active regardless.
+- Organization custom secret patterns require GitHub Secret Protection and remain disabled under the zero additional spend policy.
+- Merge queues are available only where the current repository visibility and organization plan support them. They are not a universal required gate.
+- GitHub Code Quality and native coverage rules are not enabled because they can require a separately billed capability.

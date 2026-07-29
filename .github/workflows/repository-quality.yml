@@ -5,28 +5,39 @@ on:
   push:
     branches:
       - main
-  schedule:
-    - cron: "17 4 * * 1"
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 permissions:
-  actions: read
-  contents: write
-  security-events: write
+  contents: read
 
 jobs:
   validation-scripts:
     name: validation scripts
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
       - uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
       - run: python -m compileall -q scripts tests
       - run: python -m unittest discover -s tests -v
+      - run: python scripts/check_workflow_policy.py --root .
 
   quality:
     uses: ./.github/workflows/quality.yml
     with:
       enforce-docs-layout: true
       native-security: true
+
+  codeql:
+    uses: ./.github/workflows/codeql.yml
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    with:
+      languages: '["actions","python"]'

@@ -4,7 +4,7 @@ on:
   workflow_call:
     inputs:
       shared-ref:
-        description: Immutable EnVisione/.github commit used for validation scripts.
+        description: Immutable MCEnvision/.github commit used for validation scripts.
         required: false
         type: string
         default: "main"
@@ -64,6 +64,7 @@ jobs:
     name: documentation
     if: inputs.enforce-docs-layout
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
@@ -74,7 +75,7 @@ jobs:
       - name: Check out shared validation
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: EnVisione/.github
+          repository: MCEnvision/.github
           ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Validate documentation
@@ -91,6 +92,7 @@ jobs:
   secret-scan:
     name: secret scan
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     permissions:
       contents: read
     steps:
@@ -109,6 +111,7 @@ jobs:
     name: gradle
     if: ${{ inputs.gradle-enabled }}
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     permissions:
       contents: read
     steps:
@@ -117,7 +120,7 @@ jobs:
       - name: Check out shared validation
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: EnVisione/.github
+          repository: MCEnvision/.github
           ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Set up Java
@@ -145,12 +148,13 @@ jobs:
             **/build/reports/**
             **/build/test-results/**
           if-no-files-found: ignore
-          retention-days: 14
+          retention-days: 7
 
   node:
     name: node
     if: ${{ inputs.node-enabled }}
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     permissions:
       contents: read
     steps:
@@ -159,8 +163,8 @@ jobs:
       - name: Check out shared validation
         uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6
         with:
-          repository: EnVisione/.github
-          ref: main
+          repository: MCEnvision/.github
+          ref: ${{ inputs.shared-ref }}
           path: .github-central
       - name: Set up Node.js
         uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
@@ -181,6 +185,7 @@ jobs:
         github.actor != 'dependabot[bot]'
       }}
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     permissions:
       contents: read
     steps:
