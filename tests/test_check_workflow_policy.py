@@ -41,6 +41,28 @@ class WorkflowPolicyValidationTest(unittest.TestCase):
             self.assertEqual(len(errors), 1)
             self.assertIn(".github/workflows/quality.yml:4", errors[0])
 
+    def test_local_codeql_query_requires_explicit_relative_path(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            workflows = root / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            workflow = workflows / "codeql.yml"
+            workflow.write_text(
+                "queries: security-extended,"
+                ".github-central/codeql/neoforge/neoforge-security.qls\n",
+                encoding="utf-8",
+            )
+            errors = validate(root)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("must begin with ./", errors[0])
+
+            workflow.write_text(
+                "queries: security-extended,"
+                "./.github-central/codeql/neoforge/neoforge-security.qls\n",
+                encoding="utf-8",
+            )
+            self.assertEqual(validate(root), [])
+
 
 if __name__ == "__main__":
     unittest.main()

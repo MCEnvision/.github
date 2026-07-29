@@ -132,3 +132,31 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 - [ ] Update transferred migration pull requests and open deduplicated migration pull requests for remaining caller drift.
 - [ ] Merge only callers whose required checks pass. Keep repositories with preexisting failures open for scoped repair.
 - [ ] Verify final organization ownership, caller revisions, Actions policies, tag rulesets, environments, security state, Projects, milestones, wiki links, and zero additional billed usage.
+
+### Post Merge Rollout Correction
+
+#### Current Evidence
+
+The first organization caller rollout exposed one shared CodeQL configuration defect. NeoForge callers pass `.github-central/codeql/neoforge/neoforge-security.qls` as a query specifier. Without a leading `./`, CodeQL interprets the value as an external repository specifier and stops during database initialization before analysis begins. This failure affects callers that enable the NeoForge query pack and is independent of their source code.
+
+#### Objective and Scope
+
+- [ ] Correct the shared NeoForge query suite reference to an explicit repository local path.
+- [ ] Extend central workflow policy validation and tests so a local CodeQL query suite cannot lose its `./` prefix without failing verification.
+- [ ] Verify the repair with the central Python test suite, workflow policy validator, documentation validator, release validator, and GitHub Actions.
+- [ ] Merge the repair through a reviewed pull request, then repin each still open caller migration pull request to the repaired merge commit.
+- [ ] Reevaluate every caller after repinning. Merge only callers with successful deterministic checks, no requested changes, no unresolved actionable feedback, and a mergeable head.
+
+#### Non Goals and Failure Handling
+
+- Do not weaken CodeQL, disable the NeoForge query pack, bypass a failed check, or merge a repository with an unrelated build or test failure.
+- Do not change Minecraft, NeoForge, Gradle, mappings, dependencies, or repository implementation merely to complete the workflow migration.
+- Keep repositories with independent failures in draft with automatic merge disabled. Record their exact failing gate for a later scoped repair.
+
+#### Acceptance Criteria
+
+- NeoForge CodeQL jobs resolve the shared query suite as a local path and complete initialization.
+- Central validation rejects the broken path form.
+- Every caller is pinned to one reviewed central merge commit.
+- Only fully passing caller pull requests merge.
+- Organization hard zero dollar budgets remain enabled and no paid capability or overage is introduced.

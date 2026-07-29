@@ -68,7 +68,7 @@ jobs:
           queries: >-
             ${{
               matrix.language == 'java-kotlin' && inputs.neoforge-enabled &&
-              'security-extended,.github-central/codeql/neoforge/neoforge-security.qls' ||
+              'security-extended,./.github-central/codeql/neoforge/neoforge-security.qls' ||
               'security-extended'
             }}
       - name: Build Java for CodeQL
