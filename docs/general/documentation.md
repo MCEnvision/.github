@@ -25,7 +25,7 @@ The dependency review job runs only for pull requests when native dependency rev
 
 The CodeQL job runs only when native code scanning is available and the caller supplies supported languages. Public repositories support this. Private personal repositories on GitHub Pro do not receive native CodeQL unless their plan changes.
 
-The documentation job validates the root README, required documentation files, internal Markdown links, and documentation updates accompanying implementation changes.
+The documentation job runs when the caller enables `enforce-docs-layout`. It validates the root README, required documentation files, internal Markdown links, and documentation updates accompanying implementation changes. Migration callers may leave it disabled until repository onboarding has established the required documentation layout.
 
 The secret scan uses a pinned TruffleHog release and reports verified and unknown findings. GitHub secret scanning and push protection remain separate native repository controls.
 

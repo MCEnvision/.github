@@ -57,6 +57,7 @@ on:
 jobs:
   documentation:
     name: documentation
+    if: inputs.enforce-docs-layout
     runs-on: ubuntu-latest
     permissions:
       contents: read
