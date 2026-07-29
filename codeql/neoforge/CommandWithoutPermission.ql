@@ -11,15 +11,15 @@
 
 import java
 
-predicate isLiteral(MethodAccess call) {
+predicate isLiteral(MethodCall call) {
   call.getMethod().getName() = "literal" and
   call.getMethod().getDeclaringType().hasQualifiedName("net.minecraft.commands", "Commands")
 }
 
-from MethodAccess literal
+from MethodCall literal
 where
   isLiteral(literal) and
-  not exists(MethodAccess requires |
+  not exists(MethodCall requires |
     requires.getMethod().getName() = "requires" and
     requires.getQualifier() = literal
   )

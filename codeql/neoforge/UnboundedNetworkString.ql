@@ -11,7 +11,7 @@
 
 import java
 
-from MethodAccess read
+from MethodCall read
 where
   read.getMethod().getName() = "readUtf" and
   read.getNumArgument() = 0 and

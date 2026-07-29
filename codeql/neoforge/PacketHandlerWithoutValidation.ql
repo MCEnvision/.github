@@ -22,7 +22,7 @@ predicate isPacketHandler(Method method) {
   )
 }
 
-predicate isValidationCall(MethodAccess call) {
+predicate isValidationCall(MethodCall call) {
   call.getMethod().getName() = "enqueueWork" or
   call.getMethod().getName() = "getSender" or
   call.getMethod().getName() = "hasPermission" or
@@ -34,7 +34,7 @@ predicate isValidationCall(MethodAccess call) {
 from Method method
 where
   isPacketHandler(method) and
-  not exists(MethodAccess call |
+  not exists(MethodCall call |
     call.getEnclosingCallable() = method and
     isValidationCall(call)
   )

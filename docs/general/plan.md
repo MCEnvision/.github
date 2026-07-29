@@ -137,7 +137,7 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 
 #### Current Evidence
 
-The first organization caller rollout exposed two shared CodeQL configuration defects. NeoForge callers originally passed `.github-central/codeql/neoforge/neoforge-security.qls` as a query specifier. Without a leading `./`, CodeQL interpreted the value as an external repository specifier and stopped during database initialization before analysis began. After correcting that path, Java callers with otherwise successful Gradle builds showed a second failure. Gradle restored compilation output from cache, so the manually traced CodeQL build observed no compiler execution and failed database finalization with `CodeQL could not process any code written in Java/Kotlin`. Both failures are independent of caller source behavior.
+The first organization caller rollout exposed three shared CodeQL configuration defects. NeoForge callers originally passed `.github-central/codeql/neoforge/neoforge-security.qls` as a query specifier. Without a leading `./`, CodeQL interpreted the value as an external repository specifier and stopped during database initialization before analysis began. After correcting that path, Java callers with otherwise successful Gradle builds showed a second failure. Gradle restored compilation output from cache, so the manually traced CodeQL build observed no compiler execution and failed database finalization with `CodeQL could not process any code written in Java/Kotlin`. Forced compilation corrected extraction and exposed a third defect during query compilation. Four custom NeoForge queries use the unresolved `MethodAccess` type instead of the current Java CodeQL `MethodCall` type. These failures are independent of caller source behavior.
 
 #### Objective and Scope
 
@@ -145,6 +145,9 @@ The first organization caller rollout exposed two shared CodeQL configuration de
 - [ ] Extend central workflow policy validation and tests so a local CodeQL query suite cannot lose its `./` prefix without failing verification.
 - [ ] Add a dedicated forced execution mode to the validated Gradle runner. Use it only for manual CodeQL extraction to disable the build cache and rerun configured tasks without accepting arbitrary caller supplied Gradle options.
 - [ ] Test normal cached command construction and forced CodeQL command construction on Linux and Windows.
+- [ ] Replace unresolved Java CodeQL method access types with the supported `MethodCall` API while preserving each query's matching behavior.
+- [ ] Add a central query pack compilation job that installs the pinned CodeQL CLI, resolves the custom pack dependencies, and runs `query compile --check-only` on every custom query before caller rollout.
+- [ ] Extend central validation tests so the obsolete `MethodAccess` type and removal of query compilation coverage fail verification.
 - [ ] Verify the repair with the central Python test suite, workflow policy validator, documentation validator, release validator, and GitHub Actions.
 - [ ] Merge the repair through a reviewed pull request, then repin each still open caller migration pull request to the repaired merge commit.
 - [ ] Reevaluate every caller after repinning. Merge only callers with successful deterministic checks, no requested changes, no unresolved actionable feedback, and a mergeable head.
@@ -153,12 +156,14 @@ The first organization caller rollout exposed two shared CodeQL configuration de
 
 - Do not weaken CodeQL, disable the NeoForge query pack, bypass a failed check, or merge a repository with an unrelated build or test failure.
 - Do not disable caching for ordinary quality builds. Forced execution is limited to CodeQL extraction.
+- Do not remove or disable the custom NeoForge query pack to make caller checks pass.
 - Do not change Minecraft, NeoForge, Gradle, mappings, dependencies, or repository implementation merely to complete the workflow migration.
 - Keep repositories with independent failures in draft with automatic merge disabled. Record their exact failing gate for a later scoped repair.
 
 #### Acceptance Criteria
 
 - NeoForge CodeQL jobs resolve the shared query suite as a local path and complete initialization.
+- Every custom NeoForge query compiles against the CodeQL Java library version installed by the pinned action.
 - Central validation rejects the broken path form.
 - Every caller is pinned to one reviewed central merge commit.
 - Only fully passing caller pull requests merge.

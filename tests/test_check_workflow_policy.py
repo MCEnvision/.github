@@ -85,6 +85,57 @@ class WorkflowPolicyValidationTest(unittest.TestCase):
             )
             self.assertEqual(validate(root), [])
 
+    def test_obsolete_java_codeql_method_type_is_rejected(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            query_root = root / "codeql" / "neoforge"
+            query_root.mkdir(parents=True)
+            (query_root / "Example.ql").write_text(
+                "import java\nfrom MethodAccess call select call\n",
+                encoding="utf-8",
+            )
+            workflows = root / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            (workflows / "repository-quality.yml").write_text(
+                "steps:\n"
+                f"  - uses: github/codeql-action/setup-codeql@{SHA}\n"
+                "  - run: codeql query compile --check-only -- codeql/neoforge\n",
+                encoding="utf-8",
+            )
+            errors = validate(root)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("MethodCall type", errors[0])
+
+    def test_custom_query_pack_requires_compilation_coverage(self) -> None:
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            query_root = root / "codeql" / "neoforge"
+            query_root.mkdir(parents=True)
+            (query_root / "Example.ql").write_text(
+                "import java\nfrom MethodCall call select call\n",
+                encoding="utf-8",
+            )
+            workflows = root / ".github" / "workflows"
+            workflows.mkdir(parents=True)
+            workflow = workflows / "repository-quality.yml"
+            workflow.write_text(
+                "steps:\n"
+                f"  - uses: github/codeql-action/setup-codeql@{SHA}\n",
+                encoding="utf-8",
+            )
+            errors = validate(root)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("compile the complete query pack", errors[0])
+
+            workflow.write_text(
+                "steps:\n"
+                "  - run: codeql query compile --check-only -- codeql/neoforge\n",
+                encoding="utf-8",
+            )
+            errors = validate(root)
+            self.assertEqual(len(errors), 1)
+            self.assertIn("install the pinned CodeQL CLI", errors[0])
+
 
 if __name__ == "__main__":
     unittest.main()
