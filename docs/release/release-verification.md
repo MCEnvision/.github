@@ -21,4 +21,4 @@ gh attestation verify --repo OWNER/REPOSITORY --signer-repo MCEnvision/.github -
 
 The command verifies the artifact digest and signer identity. A failed verification blocks GitHub Release, CurseForge, Modrinth, staging, and production publication.
 
-Each publication target should create or update a GitHub Deployment containing the target version, source commit, artifact digest, environment, result, and rollback relationship.
+The central release validation job records its selected GitHub environment. Each publication target must create or update a separate GitHub Deployment containing the target version, source commit, artifact digest, environment, result, and rollback relationship. The release broker owns those publication records because it receives the authoritative GitHub Release, CurseForge, Modrinth, staging, or production upload result.

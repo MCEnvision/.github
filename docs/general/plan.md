@@ -91,7 +91,7 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 - [x] Add focused unit tests for Gradle task parsing, Node.js package manager selection, workflow policy validation, and release verification.
 - [x] Add OpenSSF Scorecard for the public shared repository and publish its SARIF result to the Security tab.
 - [x] Keep every external action at an individually reviewed full commit SHA.
-- [ ] Audit the four pending major action upgrades independently before merging any upgrade.
+- [x] Audit the four pending major action upgrades independently before merging any upgrade.
 
 ### NeoForge Security Queries
 
@@ -108,7 +108,7 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 - [x] Add protected version and phase tag rulesets that block deletion, replacement, and unsigned creation.
 - [x] Require release validation to verify an annotated signed tag for tag initiated releases.
 - [x] Verify artifact attestations against the expected owner, repository, reusable workflow, source commit, and digest before external upload.
-- [ ] Record GitHub Release, CurseForge, Modrinth, staging, and production publication as GitHub Deployments with artifact digest, target version, environment, result, and rollback relationship.
+- [ ] Record GitHub Release, CurseForge, Modrinth, staging, and production publication as GitHub Deployments with artifact digest, target version, environment, result, and rollback relationship. Central validation already records its selected GitHub environment. Target publication records belong to the separate release broker and remain deferred while gateway work is excluded.
 - [x] Preserve checksums, source commit manifest, SPDX SBOM, and attestation evidence for every supported release.
 
 ### GitHub Native Development Guidance
@@ -123,7 +123,7 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 - [ ] Add audited custom secret patterns for Modrinth, CurseForge, Discord, Cloudflare, database URLs, and release broker credentials where the organization plan supports them without an added charge.
 - [ ] Dry run every custom pattern against repository history before enabling push protection.
 - [ ] Define GitHub App authentication for the separate gateway integration with signed webhook verification, short lived installation tokens, per repository permissions, idempotent delivery processing, and a failed delivery replay queue.
-- [ ] Keep gateway implementation changes separate while its active update is in progress.
+- [x] Keep gateway implementation changes separate while its active update is in progress.
 - [x] Document an optional ephemeral node1 runner that is private repository only, single job, isolated, and wiped after each job.
 - [x] Never dispatch public repository or fork pull request code to node1.
 
@@ -176,8 +176,8 @@ The first organization caller rollout exposed four shared CodeQL configuration d
 
 ## Final Organization Rollout Result
 
-All 25 transferred caller repositories resolve under `MCEnvision`. Their default branch or active migration pull request head references the reviewed shared workflow commit `e6c466f88edb57af854f597e1ce3788881d49b21`.
+All 25 transferred caller repositories resolve under `MCEnvision`. Their default branch or active migration pull request head references the reviewed shared workflow commit `d731214d860ad2422ab8956a5d337dfaec51f64a`.
 
-Thirteen migration pull requests passed every deterministic repository check, had no requested changes or unresolved review conversations, and merged through GitHub with merge commits. Twelve remain drafts with automatic merge disabled because their own dependency, Gradle, compilation, test, or CodeQL gates fail. No failed caller was merged.
+The four major action upgrades were reviewed and verified independently before merge. The central workflows now use `actions/setup-node` 7.0.0, `actions/checkout` 7.0.1, `actions/dependency-review-action` 5.0.0, and `actions/upload-artifact` 7.0.1 at full commit SHAs. The thirteen passing caller repositories were repinned through separate verified pull requests. Twelve migration pull requests remain drafts with automatic merge disabled because their own dependency, Gradle, compilation, test, or CodeQL gates fail. No failed caller was merged.
 
-The organization remains on GitHub Team with two members and no outside collaborators. Actions used 1,096 Linux minutes during the audited period. The gross usage was fully discounted and the net Actions charge was zero dollars. A billing audit found approximately $1.23 of Secret Protection usage that had already accrued on private repositories. Secret Protection, private push protection, and private advanced security were disabled on every private repository to stop further licensed usage. Hard zero dollar budgets continue to block metered Actions, Codespaces, Packages, and Git LFS overages.
+The organization remains on GitHub Team with two members and no outside collaborators. All Actions usage observed during the rollout was fully discounted or covered by included usage, leaving a net Actions charge of zero dollars. A billing audit found approximately $1.23 of Secret Protection usage that had already accrued on private repositories. Secret Protection, private push protection, and private advanced security were disabled on every private repository to stop further licensed usage. Hard zero dollar budgets continue to block metered Actions, Codespaces, Packages, and Git LFS overages.

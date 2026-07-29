@@ -114,7 +114,7 @@ Public standard Actions and public CodeQL do not consume paid minutes. Private r
 
 Custom secret patterns require GitHub Secret Protection for organization repositories. They are documented but not enabled because the zero additional spend constraint takes priority.
 
-The final organization audit measured 1,096 Linux Actions minutes. GitHub applied the included usage discount, leaving a net Actions charge of zero dollars. The same audit found approximately $1.23 of Secret Protection usage that had already accrued on private repositories. Secret Protection, private push protection, and private advanced security were disabled on every private repository. Hard zero dollar budgets with further usage blocked remain active for Actions, Codespaces, Packages, and Git LFS. The historical Secret Protection amount remains visible in billing until GitHub removes it or applies a credit.
+All Actions usage observed during the organization rollout was fully discounted or covered by included usage, leaving a net Actions charge of zero dollars. The same audit found approximately $1.23 of Secret Protection usage that had already accrued on private repositories. Secret Protection, private push protection, and private advanced security were disabled on every private repository. Hard zero dollar budgets with further usage blocked remain active for Actions, Codespaces, Packages, and Git LFS. The historical Secret Protection amount remains visible in billing until GitHub removes it or applies a credit.
 
 ## GitHub Copilot Configuration
 
@@ -136,7 +136,9 @@ The historical caller rollout covered 29 repositories before the organization tr
 
 The current organization rollout covers 25 transferred caller repositories. Thirteen migration pull requests passed their repository checks, received an approving assessment, had all review conversations resolved, and merged through the normal protected branch path.
 
-Twelve pull requests remain drafts with automatic merge disabled because their repository checks exposed project specific failures. Every transferred caller's default branch or active pull request head references the reviewed shared workflow commit `e6c466f88edb57af854f597e1ce3788881d49b21`. Transferred Minecraft pull requests resolve under MCEnvision through GitHub transfer redirects. Unrelated personal repositories remain under EnVisione.
+The four major action upgrades were independently reviewed, tested, and merged before fleet rollout. The central workflows use `actions/setup-node` 7.0.0, `actions/checkout` 7.0.1, `actions/dependency-review-action` 5.0.0, and `actions/upload-artifact` 7.0.1 at audited full commit SHAs.
+
+The thirteen passing caller repositories were repinned through verified pull requests. Twelve migration pull requests remain drafts with automatic merge disabled because their repository checks exposed project specific failures. Every transferred caller's default branch or active pull request head references the reviewed shared workflow commit `d731214d860ad2422ab8956a5d337dfaec51f64a`. A later documentation only commit in this repository does not change the reviewed workflow revision and does not require caller repinning. Transferred Minecraft pull requests resolve under MCEnvision through GitHub transfer redirects. Unrelated personal repositories remain under EnVisione.
 
 No held repository was merged. Repairing one of these repositories requires its own scoped change, successful checks, resolved review feedback, and a fresh merge decision.
 
@@ -150,3 +152,4 @@ No held repository was merged. Repairing one of these repositories requires its 
 - Organization custom secret patterns require GitHub Secret Protection and remain disabled under the zero additional spend policy.
 - Merge queues are available only where the current repository visibility and organization plan support them. They are not a universal required gate.
 - GitHub Code Quality and native coverage rules are not enabled because they can require a separately billed capability.
+- The central release validation job records its selected GitHub environment. GitHub Release, CurseForge, Modrinth, staging, and production publication records must be emitted by the separate release broker because it owns the external upload result. That integration remains outside this repository while gateway work is excluded.
