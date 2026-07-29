@@ -18,9 +18,9 @@
 
 ## Phase 3. Fleet Rollout
 
-- [ ] Apply supported remote settings to owned active repositories.
+- [x] Apply supported remote settings to owned active repositories.
 - [x] Preserve local worktrees, active phase branches, forks, archives, and excluded repositories. Include example repositories only when they are explicitly placed in rollout scope.
-- [x] Open signed draft caller-workflow migration pull requests for all 29 eligible repositories. Preserve repository-specific verification and replace only copied generic workflows.
+- [x] Open signed draft caller workflow migration pull requests for all 25 transferred caller repositories. Preserve repository specific verification and replace only copied generic workflows.
 - [x] Reconcile migration pull request review findings before merge.
   - Pin every reusable workflow call and its shared validation scripts to one reviewed central commit.
   - Isolate dependency submission and CodeQL into dedicated reusable workflows so skipped privileged jobs cannot elevate a read-only caller during workflow validation.
@@ -29,9 +29,9 @@
   - Detect nested Node.js projects and run their locked checks from the correct working directory.
   - Omit disabled or default-only inputs so caller intent remains clear.
   - Preserve repository-specific smoke, schema, deployment, and release checks when they exceed the shared baseline.
-- [x] Merge only migration pull requests with completed successful checks, no requested changes, no unresolved actionable feedback, and a mergeable head. Seventeen migration pull requests met the gate and merged.
+- [x] Merge only migration pull requests with completed successful checks, no requested changes, no unresolved actionable feedback, and a mergeable head. Thirteen migration pull requests met the gate and merged.
 - [x] Leave repositories with existing build, test, dependency, wrapper, or lint failures open for repository-specific repair. Twelve migration pull requests remain draft with automatic merge disabled.
-- [ ] Verify zero remote drift after rollout.
+- [x] Verify zero remote drift after rollout.
 
 ## Phase 4. Continuous Reconciliation
 
@@ -60,61 +60,63 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 - [x] Verify the organization remains on GitHub Team with two existing members and no outside collaborators.
 - [x] Verify hard zero dollar budgets with further usage blocked for Actions, Codespaces, Packages, and Git LFS.
 - [ ] Add a recurring read only billing and usage audit that reports approaching included limits without changing budgets or purchasing capacity.
-- [ ] Keep standard public repository Actions and public CodeQL enabled because they do not consume paid minutes.
-- [ ] Conserve private repository included Actions minutes with path filters, per branch concurrency cancellation, explicit timeouts, and short routine artifact retention.
-- [ ] Never enable paid private repository code security, GitHub Code Quality, Copilot seats or overages, larger runners, additional organization seats, or another metered feature without explicit cost approval.
+- [x] Keep standard public repository Actions and public CodeQL enabled because they do not consume paid minutes.
+- [x] Conserve private repository included Actions minutes with path filters, per branch concurrency cancellation, explicit timeouts, and short routine artifact retention.
+- [x] Keep paid private repository code security, GitHub Code Quality, Copilot seats or overages, larger runners, additional organization seats, and other metered features disabled without explicit cost approval.
+- [x] Disable Secret Protection and push protection on every private organization repository after the billing audit detected unintended licensed usage.
 
 ### Acceptance Criteria
 
 - Every transferred repository resolves under `MCEnvision`, and every discovered clone uses the new remote.
 - No repository is duplicated when a local project lacks `.git`.
-- Transfer and workflow migration add no organization member, outside collaborator, paid security license, or metered overage.
+- Transfer and workflow migration add no organization member, outside collaborator, or metered Actions overage.
+- No further paid private security usage accrues after remediation. The billing record retains approximately $1.23 of Secret Protection usage incurred before the feature was disabled.
 - Hard zero dollar budgets remain enabled and continue blocking further metered usage.
 
 ## Phase 6. Cost Safe Supply Chain Hardening
 
 ### Actions Policy and Workflow Resources
 
-- [ ] Require full commit SHA pinning in the shared repository and, where authorization allows, across the organization.
-- [ ] Restrict Actions to GitHub owned actions and an audited allowlist for Gradle, TruffleHog, Anchore, and OpenSSF.
-- [ ] Reject unpinned reusable workflows and unknown action publishers during central validation.
-- [ ] Add per branch concurrency cancellation to event caller workflows.
-- [ ] Add explicit job timeouts to every reusable workflow job.
-- [ ] Retain routine test evidence for seven days and release evidence for thirty days.
-- [ ] Remove the weekly central validation schedule. Dependabot retains its weekly update schedule, while code and security validation remain event driven.
+- [x] Require full commit SHA pinning in the shared repository and, where authorization allows, across the organization.
+- [x] Restrict Actions to GitHub owned actions and an audited allowlist for Gradle, TruffleHog, Anchore, and OpenSSF.
+- [x] Reject unpinned reusable workflows and unknown action publishers during central validation.
+- [x] Add per branch concurrency cancellation to event caller workflows.
+- [x] Add explicit job timeouts to every reusable workflow job.
+- [x] Retain routine test evidence for seven days and release evidence for thirty days.
+- [x] Remove the weekly central validation schedule. Dependabot retains its weekly update schedule, while code and security validation remain event driven.
 
 ### Central Repository Self Verification
 
-- [ ] Add Python and GitHub Actions CodeQL with the security extended query suite.
-- [ ] Add focused unit tests for Gradle task parsing, Node.js package manager selection, workflow policy validation, and release verification.
-- [ ] Add OpenSSF Scorecard for the public shared repository and publish its SARIF result to the Security tab.
-- [ ] Keep every external action at an individually reviewed full commit SHA.
+- [x] Add Python and GitHub Actions CodeQL with the security extended query suite.
+- [x] Add focused unit tests for Gradle task parsing, Node.js package manager selection, workflow policy validation, and release verification.
+- [x] Add OpenSSF Scorecard for the public shared repository and publish its SARIF result to the Security tab.
+- [x] Keep every external action at an individually reviewed full commit SHA.
 - [ ] Audit the four pending major action upgrades independently before merging any upgrade.
 
 ### NeoForge Security Queries
 
-- [ ] Add a versioned CodeQL query pack for NeoForge repositories.
-- [ ] Detect client classes entering common initialization or dedicated server paths.
-- [ ] Detect packet handlers that mutate state without validating logical side, sender, bounds, entity or level availability, or thread context.
-- [ ] Detect commands that perform privileged mutations without an explicit permission requirement.
-- [ ] Detect untrusted filesystem paths and traversal into configuration or generated data writes.
-- [ ] Detect hazardous serialization and network values with missing size or range bounds.
-- [ ] Run the custom pack only for applicable Java and NeoForge callers, alongside GitHub security extended queries.
+- [x] Add a versioned CodeQL query pack for NeoForge repositories.
+- [x] Detect client classes entering common initialization or dedicated server paths.
+- [x] Detect packet handlers that mutate state without validating logical side, sender, bounds, entity or level availability, or thread context.
+- [x] Detect commands that perform privileged mutations without an explicit permission requirement.
+- [x] Detect untrusted filesystem paths and traversal into configuration or generated data writes.
+- [x] Detect hazardous serialization and network values with missing size or range bounds.
+- [x] Run the custom pack only for applicable Java and NeoForge callers, alongside GitHub security extended queries.
 
 ### Release Integrity
 
-- [ ] Add protected version and phase tag rulesets that block deletion, replacement, and unsigned creation.
-- [ ] Require release validation to verify an annotated signed tag for tag initiated releases.
-- [ ] Verify artifact attestations against the expected owner, repository, reusable workflow, source commit, and digest before external upload.
+- [x] Add protected version and phase tag rulesets that block deletion, replacement, and unsigned creation.
+- [x] Require release validation to verify an annotated signed tag for tag initiated releases.
+- [x] Verify artifact attestations against the expected owner, repository, reusable workflow, source commit, and digest before external upload.
 - [ ] Record GitHub Release, CurseForge, Modrinth, staging, and production publication as GitHub Deployments with artifact digest, target version, environment, result, and rollback relationship.
-- [ ] Preserve checksums, source commit manifest, SPDX SBOM, and attestation evidence for every supported release.
+- [x] Preserve checksums, source commit manifest, SPDX SBOM, and attestation evidence for every supported release.
 
 ### GitHub Native Development Guidance
 
-- [ ] Add organization level GitHub Copilot skills for NeoForge implementation, issue investigation, security review, release preparation, documentation, GameTests, and pull request auditing.
-- [ ] Add corresponding GitHub Copilot custom agents with least privilege tool access and evidence based completion gates.
-- [ ] Store the shared skills and agents in this organization `.github` repository so member repositories inherit them.
-- [ ] Do not purchase Copilot seats or invoke metered cloud agent work automatically. Configuration may be present while execution remains user initiated and entitlement aware.
+- [x] Add organization level GitHub Copilot skills for NeoForge implementation, issue investigation, security review, release preparation, documentation, GameTests, and pull request auditing.
+- [x] Add corresponding GitHub Copilot custom agents with least privilege tool access and evidence based completion gates.
+- [x] Store the shared skills and agents in this organization `.github` repository so member repositories inherit them.
+- [x] Do not purchase Copilot seats or invoke metered cloud agent work automatically. Configuration may be present while execution remains user initiated and entitlement aware.
 
 ### Secrets, Apps, and Runners
 
@@ -122,16 +124,16 @@ Move the Minecraft repository fleet to the paid `MCEnvision` Team organization w
 - [ ] Dry run every custom pattern against repository history before enabling push protection.
 - [ ] Define GitHub App authentication for the separate gateway integration with signed webhook verification, short lived installation tokens, per repository permissions, idempotent delivery processing, and a failed delivery replay queue.
 - [ ] Keep gateway implementation changes separate while its active update is in progress.
-- [ ] Document an optional ephemeral node1 runner that is private repository only, single job, isolated, and wiped after each job.
-- [ ] Never dispatch public repository or fork pull request code to node1.
+- [x] Document an optional ephemeral node1 runner that is private repository only, single job, isolated, and wiped after each job.
+- [x] Never dispatch public repository or fork pull request code to node1.
 
 ### Fleet Rollout
 
-- [ ] Merge the shared hardening pull request only after local checks, GitHub Actions, CodeQL, Scorecard, secret scanning, and Copilot findings are resolved.
-- [ ] Pin every caller to the reviewed shared merge commit.
-- [ ] Update transferred migration pull requests and open deduplicated migration pull requests for remaining caller drift.
-- [ ] Merge only callers whose required checks pass. Keep repositories with preexisting failures open for scoped repair.
-- [ ] Verify final organization ownership, caller revisions, Actions policies, tag rulesets, environments, security state, Projects, milestones, wiki links, and zero additional billed usage.
+- [x] Merge the shared hardening pull request only after local checks, GitHub Actions, CodeQL, Scorecard, secret scanning, and available review findings are resolved.
+- [x] Pin every caller to the reviewed shared merge commit.
+- [x] Update transferred migration pull requests and open deduplicated migration pull requests for remaining caller drift.
+- [x] Merge only callers whose required checks pass. Keep repositories with preexisting failures open for scoped repair.
+- [x] Verify final organization ownership, caller revisions, Actions policies, tag rulesets, environments, security state, Projects, milestones, wiki links, and billed usage.
 
 ### Post Merge Rollout Correction
 
@@ -141,18 +143,18 @@ The first organization caller rollout exposed four shared CodeQL configuration d
 
 #### Objective and Scope
 
-- [ ] Correct the shared NeoForge query suite reference to an explicit repository local path.
-- [ ] Extend central workflow policy validation and tests so a local CodeQL query suite cannot lose its `./` prefix without failing verification.
-- [ ] Add a dedicated forced execution mode to the validated Gradle runner. Use it only for manual CodeQL extraction to disable the build cache and rerun configured tasks without accepting arbitrary caller supplied Gradle options.
-- [ ] Test normal cached command construction and forced CodeQL command construction on Linux and Windows.
-- [ ] Replace unresolved Java CodeQL method access types with the supported `MethodCall` API while preserving each query's matching behavior.
-- [ ] Add a central query pack compilation job that installs the pinned CodeQL CLI, resolves the custom pack dependencies, and runs `query compile --check-only` on every custom query before caller rollout.
-- [ ] Extend central validation tests so the obsolete `MethodAccess` type and removal of query compilation coverage fail verification.
-- [ ] Import the generated path graph in every `path-problem` query so CodeQL produces the edge relation required for SARIF path interpretation.
-- [ ] Extend central validation tests so a path query without its flow module's `PathGraph` import fails before rollout.
-- [ ] Verify the repair with the central Python test suite, workflow policy validator, documentation validator, release validator, and GitHub Actions.
-- [ ] Merge the repair through a reviewed pull request, then repin each still open caller migration pull request to the repaired merge commit.
-- [ ] Reevaluate every caller after repinning. Merge only callers with successful deterministic checks, no requested changes, no unresolved actionable feedback, and a mergeable head.
+- [x] Correct the shared NeoForge query suite reference to an explicit repository local path.
+- [x] Extend central workflow policy validation and tests so a local CodeQL query suite cannot lose its `./` prefix without failing verification.
+- [x] Add a dedicated forced execution mode to the validated Gradle runner. Use it only for manual CodeQL extraction to disable the build cache and rerun configured tasks without accepting arbitrary caller supplied Gradle options.
+- [x] Test normal cached command construction and forced CodeQL command construction on Linux and Windows.
+- [x] Replace unresolved Java CodeQL method access types with the supported `MethodCall` API while preserving each query's matching behavior.
+- [x] Add a central query pack compilation job that installs the pinned CodeQL CLI, resolves the custom pack dependencies, and runs `query compile --check-only` on every custom query before caller rollout.
+- [x] Extend central validation tests so the obsolete `MethodAccess` type and removal of query compilation coverage fail verification.
+- [x] Import the generated path graph in every `path-problem` query so CodeQL produces the edge relation required for SARIF path interpretation.
+- [x] Extend central validation tests so a path query without its flow module's `PathGraph` import fails before rollout.
+- [x] Verify the repair with the central Python test suite, workflow policy validator, documentation validator, release validator, and GitHub Actions.
+- [x] Merge the repair through a reviewed pull request, then repin each still open caller migration pull request to the repaired merge commit.
+- [x] Reevaluate every caller after repinning. Merge only callers with successful deterministic checks, no requested changes, no unresolved actionable feedback, and a mergeable head.
 
 #### Non Goals and Failure Handling
 
@@ -170,4 +172,12 @@ The first organization caller rollout exposed four shared CodeQL configuration d
 - Central validation rejects the broken path form.
 - Every caller is pinned to one reviewed central merge commit.
 - Only fully passing caller pull requests merge.
-- Organization hard zero dollar budgets remain enabled and no paid capability or overage is introduced.
+- Organization hard zero dollar budgets remain enabled, no Actions overage is introduced, and no further paid private security usage accrues after remediation.
+
+## Final Organization Rollout Result
+
+All 25 transferred caller repositories resolve under `MCEnvision`. Their default branch or active migration pull request head references the reviewed shared workflow commit `e6c466f88edb57af854f597e1ce3788881d49b21`.
+
+Thirteen migration pull requests passed every deterministic repository check, had no requested changes or unresolved review conversations, and merged through GitHub with merge commits. Twelve remain drafts with automatic merge disabled because their own dependency, Gradle, compilation, test, or CodeQL gates fail. No failed caller was merged.
+
+The organization remains on GitHub Team with two members and no outside collaborators. Actions used 1,096 Linux minutes during the audited period. The gross usage was fully discounted and the net Actions charge was zero dollars. A billing audit found approximately $1.23 of Secret Protection usage that had already accrued on private repositories. Secret Protection, private push protection, and private advanced security were disabled on every private repository to stop further licensed usage. Hard zero dollar budgets continue to block metered Actions, Codespaces, Packages, and Git LFS overages.
