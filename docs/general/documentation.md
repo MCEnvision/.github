@@ -85,7 +85,9 @@ Stable quality checks become required only after the caller workflow exists and 
 
 CODEOWNERS requests EnVisione review without making that review a merge requirement.
 
-When Copilot code review is available, the ruleset requests review for new pull requests and new pushes. Copilot comments do not count as required approvals. Findings are evaluated against code, tests, repository rules, and current documentation before they are accepted or rejected.
+Automatic paid review is disabled. It is not a deterministic merge gate and must not consume a paid seat or repeatedly spend a limited review quota after pushes. A ready pull request may receive one review through the configured repository integration after local verification and required checks pass. Another review is requested only when a material implementation change invalidates the completed review. Review availability remains nonblocking, while formatting, tests, builds, CodeQL, dependency review, secret scanning, and repository specific acceptance checks remain authoritative.
+
+The review path does not install a metered API key workflow and does not depend on an application gateway. It uses the configured repository integration and existing entitlement when available.
 
 ## Environments
 
