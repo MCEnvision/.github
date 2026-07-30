@@ -174,6 +174,42 @@ The first organization caller rollout exposed four shared CodeQL configuration d
 - Only fully passing caller pull requests merge.
 - Organization hard zero dollar budgets remain enabled, no Actions overage is introduced, and no further paid private security usage accrues after remediation.
 
+## Phase 7. Fleet Repair and Repository Review
+
+### Current Evidence
+
+Twelve workflow migration pull requests remain draft because repository specific dependency, Gradle Wrapper, compilation, test, or CodeQL gates fail. Each pull request also accumulated six unsuccessful GitHub Copilot review attempts. The organization ruleset requested reviews for draft pull requests and requested another review after every push, which exhausted the available Copilot quota without producing useful findings.
+
+### Review Policy
+
+- Remove automatic GitHub Copilot review from organization repository rulesets and future onboarding.
+- Do not purchase Copilot seats, enable Copilot overages, or make Copilot availability a merge requirement.
+- Use one configured repository review after a pull request is ready and deterministic verification has passed.
+- Do not request another review unless a material implementation change invalidates the completed review.
+- Keep formatting, tests, builds, CodeQL, dependency review, secret scanning, and repository specific checks as the authoritative merge gates.
+- Allow review unavailability to remain nonblocking when all deterministic required checks and repository acceptance criteria pass.
+- Do not add a metered API key workflow merely to perform pull request review. Review must use the configured repository integration and existing entitlement.
+
+### Repair Scope
+
+- Reconcile every migration branch with the latest default branch before diagnosing a remaining failure.
+- Repair repository specific dependency resolution, wrapper, source compatibility, test, and CodeQL failures without weakening required checks.
+- Preserve repository architecture, supported Minecraft and loader versions, dependency boundaries, and existing user behavior unless a verified defect requires a scoped correction.
+- Update each pull request with concise evidence of the repair and its verification result.
+- Move a pull request out of draft only after its local verification and required GitHub checks pass.
+- Merge each passing pull request through GitHub using a merge commit, then verify the resulting default branch.
+- Keep any pull request open with its exact remaining blocker when a safe repository grounded repair cannot be completed.
+
+### Acceptance Criteria
+
+- Automatic Copilot review is absent from every owned organization repository ruleset and from repository onboarding.
+- No pull request receives repeated paid or quota limited review requests after ordinary pushes.
+- Each ready migration pull request receives no more than one configured repository review unless a material post review change requires a replacement review.
+- Every merged migration pull request has successful required checks, resolved actionable feedback, and a mergeable head.
+- All twelve open migration pull requests are repaired and merged, or retain a precise evidence backed blocker without weakened checks.
+- Plans, documentation, Issues, Projects, milestones, and pull request state reflect the verified result.
+- Organization hard zero dollar budgets remain enabled and no Copilot purchase or metered API review workflow is introduced.
+
 ## Final Organization Rollout Result
 
 All 25 transferred caller repositories resolve under `MCEnvision`. Their default branch or active migration pull request head references the reviewed shared workflow commit `d731214d860ad2422ab8956a5d337dfaec51f64a`.
