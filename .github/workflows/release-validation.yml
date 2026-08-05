@@ -59,13 +59,13 @@ jobs:
           path: .github-central
       - name: Set up Java
         if: ${{ inputs.gradle-enabled }}
-        uses: actions/setup-java@03ad4de0992f5dab5e18fcb136590ce7c4a0ac95 # v5
+        uses: actions/setup-java@b6effb05e454b25005698d916606bdc6ffcbf961 # v5
         with:
           distribution: temurin
           java-version: ${{ inputs.java-version }}
       - name: Set up and validate Gradle
         if: ${{ inputs.gradle-enabled }}
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
       - name: Build release artifacts
         if: ${{ inputs.gradle-enabled }}
         env:
@@ -94,12 +94,12 @@ jobs:
           dependency-snapshot: false
       - name: Attest release artifacts
         if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
         with:
           subject-path: ${{ inputs.artifact-glob }}
       - name: Attest release SBOM
         if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@508db95dd578ae2727ebd6217d5ba78e4fbda05d # v4
         with:
           subject-path: ${{ inputs.artifact-glob }}
           sbom-path: release-validation/release.spdx.json
