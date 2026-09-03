@@ -33,7 +33,7 @@ The shared repository scans its Python and GitHub Actions sources with CodeQL. O
 
 `MCEnvision/.github/.github/workflows/release-validation.yml@<reviewed commit sha>`
 
-The release workflow builds and inspects artifacts, creates SHA 256 and SHA 512 checksum files, generates an SPDX JSON SBOM, records the source commit, requires a verified signed annotated tag for tag initiated releases, and creates build and SBOM attestations when GitHub supports them. It then verifies the artifact digest and signer identity against the expected caller and shared workflow.
+The release workflow builds and inspects artifacts, creates SHA 256 and SHA 512 checksum files, generates an SPDX JSON SBOM, records the source commit, requires a verified signed annotated tag for tag initiated releases, and creates build and SBOM attestations when GitHub supports them. It then independently verifies provenance and SPDX SBOM predicates against the expected caller, source commit, and exact shared workflow.
 
 ## Security Model
 
