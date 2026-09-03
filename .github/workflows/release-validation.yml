@@ -65,7 +65,7 @@ jobs:
           java-version: ${{ inputs.java-version }}
       - name: Set up and validate Gradle
         if: ${{ inputs.gradle-enabled }}
-        uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6
+        uses: gradle/actions/setup-gradle@9c971963bec38e04b3d30dcc455b5382be2fdbfb # v6
       - name: Build release artifacts
         if: ${{ inputs.gradle-enabled }}
         env:
@@ -84,7 +84,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: python .github-central/scripts/verify_release_tag.py
       - name: Generate SPDX SBOM
-        uses: anchore/sbom-action@e22c389904149dbc22b58101806040fa8d37a610 # v0.24.0
+        uses: anchore/sbom-action@3ad7283483fc7af8ff2b4ea19663c2d5ca935e26 # v0.24.2
         with:
           path: ${{ inputs.sbom-path }}
           format: spdx-json
@@ -94,12 +94,12 @@ jobs:
           dependency-snapshot: false
       - name: Attest release artifacts
         if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: ${{ inputs.artifact-glob }}
       - name: Attest release SBOM
         if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
-        uses: actions/attest@f7c74d28b9d84cb8768d0b8ca14a4bac6ef463e6 # v4
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
         with:
           subject-path: ${{ inputs.artifact-glob }}
           sbom-path: release-validation/release.spdx.json
