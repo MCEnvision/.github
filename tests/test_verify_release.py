@@ -89,6 +89,64 @@ class ReleaseEvidenceValidationTest(unittest.TestCase):
                 SPDX_PREDICATE,
             )
 
+    def test_tampered_artifact_rejection_requires_both_predicates(self) -> None:
+        with TemporaryDirectory() as directory:
+            artifact = Path(directory) / "example.jar"
+            artifact.write_bytes(b"release artifact")
+            tampered = Path(directory) / "tampered"
+            arguments = [
+                "verify_attestations.py",
+                "--artifact-glob",
+                str(artifact),
+                "--repository",
+                "MCEnvision/example",
+                "--signer-workflow",
+                "MCEnvision/.github/.github/workflows/release-validation.yml",
+                "--source-digest",
+                "0123456789abcdef0123456789abcdef01234567",
+                "--expect-failure",
+                "--tamper-output-directory",
+                str(tampered),
+            ]
+            with (
+                patch.object(sys, "argv", arguments),
+                patch(
+                    "scripts.verify_attestations.subprocess.run",
+                    side_effect=[
+                        subprocess.CompletedProcess([], 1),
+                        subprocess.CompletedProcess([], 1),
+                    ],
+                ) as run,
+            ):
+                self.assertEqual(verify_attestations(), 0)
+            self.assertEqual(run.call_count, 2)
+            self.assertNotEqual((tampered / artifact.name).read_bytes(), artifact.read_bytes())
+
+    def test_tampered_artifact_acceptance_fails_closed(self) -> None:
+        with TemporaryDirectory() as directory:
+            artifact = Path(directory) / "example.jar"
+            artifact.write_bytes(b"release artifact")
+            arguments = [
+                "verify_attestations.py",
+                "--artifact-glob",
+                str(artifact),
+                "--repository",
+                "MCEnvision/example",
+                "--signer-workflow",
+                "MCEnvision/.github/.github/workflows/release-validation.yml",
+                "--source-digest",
+                "0123456789abcdef0123456789abcdef01234567",
+                "--expect-failure",
+            ]
+            with (
+                patch.object(sys, "argv", arguments),
+                patch(
+                    "scripts.verify_attestations.subprocess.run",
+                    return_value=subprocess.CompletedProcess([], 0),
+                ),
+            ):
+                self.assertEqual(verify_attestations(), 1)
+
 
 if __name__ == "__main__":
     unittest.main()

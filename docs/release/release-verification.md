@@ -22,4 +22,6 @@ gh attestation verify --repo OWNER/REPOSITORY --signer-workflow MCEnvision/.gith
 
 The workflow path identifies the shared signer repository and exact reusable workflow without combining incompatible GitHub CLI identity filters. The first command verifies build provenance. The second verifies the SPDX SBOM predicate. A failed verification blocks GitHub Release, CurseForge, Modrinth, staging, and production publication.
 
+After the untouched artifact passes, the shared workflow copies each candidate outside the retained release bundle, changes one byte, and reruns both checks with `--expect-failure`. Both predicates must reject the altered copy. An accepted altered copy fails release validation.
+
 The central release validation job records its selected GitHub environment. Each publication target must create or update a separate GitHub Deployment containing the target version, source commit, artifact digest, environment, result, and rollback relationship. The release broker owns those publication records because it receives the authoritative GitHub Release, CurseForge, Modrinth, staging, or production upload result.
