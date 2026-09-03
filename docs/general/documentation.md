@@ -53,7 +53,7 @@ Release validation uses a protected GitHub environment selected by the caller. I
 6. Generates an SPDX JSON SBOM.
 7. Uploads a validation bundle.
 8. Creates build provenance and SBOM attestations for public repositories.
-9. Verifies each public artifact attestation against the caller repository, `MCEnvision/.github`, the release validation workflow, and the artifact digest.
+9. Verifies both build provenance and SPDX SBOM attestations against the caller repository, exact release validation workflow, source commit, and artifact digest. The reusable workflow path identifies `MCEnvision/.github` without combining mutually exclusive GitHub CLI signer filters.
 
 GitHub Pro supports artifact attestations for public repositories. Private repositories require GitHub Enterprise Cloud, so private callers retain the checksums, manifest, SBOM, and workflow evidence without attempting unsupported attestations.
 

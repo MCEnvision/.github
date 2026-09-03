@@ -13,53 +13,69 @@ try:
 except ModuleNotFoundError:
     from check_release import artifacts
 
+PROVENANCE_PREDICATE = "https://slsa.dev/provenance/v1"
+SPDX_PREDICATE = "https://spdx.dev/Document/v2.3"
 
-def verification_command(
+
+def verification_commands(
     artifact: Path,
     repository: str,
-    signer_repository: str,
     signer_workflow: str,
-) -> list[str]:
-    return [
-        "gh",
-        "attestation",
-        "verify",
-        "--repo",
-        repository,
-        "--signer-repo",
-        signer_repository,
-        "--signer-workflow",
-        signer_workflow,
-        str(artifact),
-    ]
+    source_digest: str,
+) -> list[tuple[str, list[str]]]:
+    commands = []
+    for predicate in (PROVENANCE_PREDICATE, SPDX_PREDICATE):
+        commands.append(
+            (
+                predicate,
+                [
+                    "gh",
+                    "attestation",
+                    "verify",
+                    "--repo",
+                    repository,
+                    "--signer-workflow",
+                    signer_workflow,
+                    "--source-digest",
+                    source_digest,
+                    "--predicate-type",
+                    predicate,
+                    str(artifact),
+                ],
+            )
+        )
+    return commands
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--artifact-glob", action="append", required=True)
     parser.add_argument("--repository", required=True)
-    parser.add_argument("--signer-repository", required=True)
     parser.add_argument("--signer-workflow", required=True)
+    parser.add_argument("--source-digest", required=True)
     args = parser.parse_args()
     selected = artifacts(args.artifact_glob)
     if not selected:
         print("attestation error: no release artifacts matched", file=sys.stderr)
         return 1
     for artifact in selected:
-        command = verification_command(
+        commands = verification_commands(
             artifact,
             args.repository,
-            args.signer_repository,
             args.signer_workflow,
+            args.source_digest,
         )
-        result = subprocess.run(command, check=False)
-        if result.returncode:
-            print(
-                f"attestation error: verification failed for {artifact}",
-                file=sys.stderr,
-            )
-            return result.returncode
-    print(f"verified {len(selected)} release artifact attestations")
+        for predicate, command in commands:
+            result = subprocess.run(command, check=False)
+            if result.returncode:
+                print(
+                    f"attestation error: {predicate} verification failed for {artifact}",
+                    file=sys.stderr,
+                )
+                return result.returncode
+    print(
+        f"verified {len(selected)} release artifacts for provenance and SPDX SBOM attestations"
+    )
     return 0
 
 

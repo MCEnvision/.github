@@ -112,8 +112,8 @@ jobs:
           python .github-central/scripts/verify_attestations.py
           --artifact-glob "$ARTIFACT_GLOB"
           --repository "$GITHUB_REPOSITORY"
-          --signer-repository "MCEnvision/.github"
           --signer-workflow "MCEnvision/.github/.github/workflows/release-validation.yml"
+          --source-digest "$GITHUB_SHA"
       - name: Retain validated release bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
