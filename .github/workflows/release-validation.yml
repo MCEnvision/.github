@@ -114,6 +114,19 @@ jobs:
           --repository "$GITHUB_REPOSITORY"
           --signer-workflow "MCEnvision/.github/.github/workflows/release-validation.yml"
           --source-digest "$GITHUB_SHA"
+      - name: Verify tampered release artifacts are rejected
+        if: ${{ inputs.attest && github.event.repository.visibility == 'public' }}
+        env:
+          ARTIFACT_GLOB: ${{ inputs.artifact-glob }}
+          GH_TOKEN: ${{ github.token }}
+        run: >-
+          python .github-central/scripts/verify_attestations.py
+          --artifact-glob "$ARTIFACT_GLOB"
+          --repository "$GITHUB_REPOSITORY"
+          --signer-workflow "MCEnvision/.github/.github/workflows/release-validation.yml"
+          --source-digest "$GITHUB_SHA"
+          --expect-failure
+          --tamper-output-directory "$RUNNER_TEMP/tampered-release"
       - name: Retain validated release bundle
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
